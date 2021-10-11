@@ -1,6 +1,7 @@
 #!/bin/zsh
 
-source "$(dirname "$0")/util.sh"
+script_dir="$(dirname "$0")"
+source "$script_dir/util.sh"
 
 src_dir="./src"
 
@@ -12,23 +13,23 @@ sub_atcoder() {
   ans_path="$ans_dir/main.cpp"
   tmpl_path="$atcoder_dir/template.cpp"
 
+  atcoder_new() {
+    mkdir -p "$ans_dir" && cp "$tmpl_path" "$ans_path" && cd "$ans_dir" && oj d "$url" "$@"
+  }
+
+  atcoder_test() {
+    cd "$ans_dir" && oj t "$@"
+  }
+
+  atcoder_submit() {
+    oj s -y "$url" "$ans_path" "$@"
+  }
+
   case "$command" in
-  n | new)
-    mkdir -p "$ans_dir" &&
-      cp "$tmpl_path" "$ans_path" &&
-      cd "$ans_dir" &&
-      oj d "$url"
-    ;;
-  t | test)
-    cd "$ans_dir" &&
-      oj t
-    ;;
-  s | submit)
-    oj s -y "$url" "$ans_path"
-    ;;
-  *)
-    echo "unknown command: $command" && exit 1
-    ;;
+  n | new) shift 2 && atcoder_new "$@" && exit 0 ;;
+  t | test) shift 2 && atcoder_test "$@" && exit 0 ;;
+  s | submit) shift 2 && atcoder_submit "$@" && exit 0 ;;
+  *) echo "unknown command: $command" && exit 1 ;;
   esac
 }
 
