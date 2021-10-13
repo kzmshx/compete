@@ -1,0 +1,107 @@
+#!/bin/zsh
+
+script_dir="$(dirname "$0")"
+source "$script_dir/../lib/lib.sh"
+
+src_dir() { echo "src"; }
+
+atcoder_dir() { echo "$(src_dir)/atcoder"; }
+atcoder_template_file() { echo "$(atcoder_dir)/template.cpp"; }
+atcoder_answer_dir() { echo "$(atcoder_dir)/$1/$2"; }
+
+sub_new() {
+  sub_new_atcoder() {
+    local url="$1"
+    local contest task answer_dir answer_file testcase_dir template_file
+
+    read -r contest task <<<"$(parse_atcoder_url "$url")"
+    answer_dir="$(atcoder_answer_dir "$contest" "$task")"
+    answer_file="$answer_dir/main.cpp"
+    testcase_dir="$answer_dir/test"
+    template_file="$(atcoder_template_file)"
+
+    shift &&
+      mkdir -p "$answer_dir" &&
+      cp "$template_file" "$answer_file" &&
+      cd "$answer_dir" &&
+      oj d -d "$testcase_dir" "$url" "$@"
+  }
+
+  if is_atcoder "$1"; then
+    local url="$1"
+    sub_new_atcoder "$url"
+  else
+    echo "unsupported format: $1" && exit 1
+  fi
+}
+
+sub_test() {
+  test_atcoder() {
+    local url="$1"
+    local contest task answer_dir answer_file target
+
+    read -r contest task <<<"$(parse_atcoder_url "$url")"
+    answer_dir="$(atcoder_answer_dir "$contest" "$task")"
+    answer_file="$answer_dir/main.cpp"
+    testcase_dir="$answer_dir/test"
+
+    target="$(build "$answer_file")"
+    trap "rm -f $target" EXIT
+
+    shift && oj t -c "$target" -d "$testcase_dir" "$@"
+  }
+
+  test_local() {
+    local answer_file="$1"
+    local answer_dir testcase_dir target i
+
+    in_file() { echo "$testcase_dir/sample-$1.in"; }
+    out_file() { echo "$testcase_dir/sample-$1.out"; }
+
+    answer_dir="$(dirname "$answer_file")"
+    testcase_dir="$answer_dir/test"
+
+    target="$(build "$answer_file")"
+    trap "rm -f $target" EXIT
+
+    i=1
+    while [ -f "$(in_file $i)" ] && [ -f "$(out_file $i)" ]; do
+      assert "$target" "$(in_file $i)" "$(out_file $i)"
+      i=$((i + 1))
+    done
+  }
+
+  if is_atcoder "$1"; then
+    test_atcoder "$1"
+  elif [ -f "$1" ]; then
+    test_local "$1"
+  else
+    echo "unsupported format: $1" && exit 1
+  fi
+}
+
+sub_submit() {
+  submit_atcoder() {
+    local url="$1"
+    local contest task answer_file
+
+    read -r contest task <<<"$(parse_atcoder_url "$url")"
+    answer_dir="$(atcoder_answer_dir "$contest" "$task")"
+    answer_file="$answer_dir/main.cpp"
+
+    shift && oj s -y "$url" "$answer_file" "$@"
+  }
+
+  if is_atcoder "$1"; then
+    submit_atcoder "$1"
+  else
+    echo "unsupported format: $1" && exit 1
+  fi
+}
+
+case "$1" in
+n | new) shift 1 && sub_new "$@" && exit 0 ;;
+t | test) shift 1 && sub_test "$@" && exit 0 ;;
+s | submit) shift 1 && sub_submit "$@" && exit 0 ;;
+*) echo "unknown command: $1" && exit 1 ;;
+esac

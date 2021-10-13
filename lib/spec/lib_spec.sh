@@ -1,5 +1,5 @@
-Describe 'util.sh'
-  Include util.sh
+Describe 'lib.sh'
+  Include lib.sh
 
   Describe 'lower'
     It 'converts upper chars to lowers'
