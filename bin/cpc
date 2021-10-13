@@ -37,7 +37,7 @@ sub_new() {
 sub_test() {
   test_atcoder() {
     local url="$1"
-    local contest task answer_dir answer_file target
+    local contest task answer_dir answer_file testcase_dir target
 
     read -r contest task <<<"$(parse_atcoder_url "$url")"
     answer_dir="$(atcoder_answer_dir "$contest" "$task")"
@@ -47,15 +47,12 @@ sub_test() {
     target="$(build "$answer_file")"
     trap "rm -f $target" EXIT
 
-    shift && oj t -c "$target" -d "$testcase_dir" "$@"
+    run_tests "$target" "$testcase_dir"
   }
 
   test_local() {
     local answer_file="$1"
-    local answer_dir testcase_dir target i
-
-    in_file() { echo "$testcase_dir/sample-$1.in"; }
-    out_file() { echo "$testcase_dir/sample-$1.out"; }
+    local answer_dir testcase_dir target
 
     answer_dir="$(dirname "$answer_file")"
     testcase_dir="$answer_dir/test"
@@ -63,11 +60,7 @@ sub_test() {
     target="$(build "$answer_file")"
     trap "rm -f $target" EXIT
 
-    i=1
-    while [ -f "$(in_file $i)" ] && [ -f "$(out_file $i)" ]; do
-      assert "$target" "$(in_file $i)" "$(out_file $i)"
-      i=$((i + 1))
-    done
+    run_tests "$target" "$testcase_dir"
   }
 
   if is_atcoder "$1"; then
