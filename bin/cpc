@@ -23,7 +23,6 @@ sub_new() {
     shift &&
       mkdir -p "$answer_dir" &&
       cp "$template_file" "$answer_file" &&
-      cd "$answer_dir" &&
       oj d -d "$testcase_dir" "$url" "$@"
   }
 
