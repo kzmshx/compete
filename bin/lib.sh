@@ -36,7 +36,7 @@ build() {
   src="$(realpath "$1")"
   target="${src%.*}"
 
-  $cxx ${cxxflags[*]} -o "$target" "$src"
+  $cxx ${cxxflags[*]} "$src" -o "$target"
 
   echo "$target"
 }

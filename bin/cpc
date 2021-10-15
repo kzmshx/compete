@@ -1,48 +1,235 @@
 #!/bin/zsh
 
-script_dir="$(dirname "$0")"
-source "$script_dir/../lib/lib.sh"
+# ////////////////////////////////////////////////////////////////
+# Globals
+# ////////////////////////////////////////////////////////////////
 
-src_dir() { echo "src"; }
+_script_dir="$(dirname "$0")"
+_src_dir="$(pwd)/src"
 
-atcoder_dir() { echo "$(src_dir)/atcoder"; }
-atcoder_template_file() { echo "$(atcoder_dir)/template.cpp"; }
-atcoder_answer_dir() { echo "$(atcoder_dir)/$1/$2"; }
+_lang_cpp="cpp"
+_lang_go="go"
+_lang_py="py"
+_lang_php="php"
 
-sub_new() {
-  sub_new_atcoder() {
-    local url="$1"
-    local contest task answer_dir answer_file testcase_dir template_file
+_ext_cpp=".cpp"
+_ext_go=".go"
+_ext_py=".py"
+_ext_php=".php"
 
-    read -r contest task <<<"$(parse_atcoder_url "$url")"
-    answer_dir="$(atcoder_answer_dir "$contest" "$task")"
-    answer_file="$answer_dir/main.cpp"
-    testcase_dir="$answer_dir/test"
-    template_file="$(atcoder_template_file)"
+# ////////////////////////////////////////////////////////////////
+# Utils
+# ////////////////////////////////////////////////////////////////
 
-    shift &&
-      mkdir -p "$answer_dir" &&
-      cp "$template_file" "$answer_file" &&
-      oj d -d "$testcase_dir" "$url" "$@"
+lower() { cat - | tr '[:upper:]' '[:lower:]'; }
+
+regex_match() {
+  local pattern="$1" string="$2"
+  expr "$string" : "$pattern" >/dev/null
+}
+
+regex_replace() {
+  local pattern="$1" replacement="$2" string="$3"
+  echo "$string" | sed "s/$pattern/$replacement/"
+}
+
+lang_to_ext() {
+  local lang="$1"
+  case $lang in
+  "$_lang_cpp") echo "$_ext_cpp" ;;
+    #  "$_lang_go") echo "$_ext_go" ;;
+    #  "$_lang_py") echo "$_ext_py" ;;
+    #  "$_lang_php") echo "$_ext_php" ;;
+  *) echo "unsupported language code: $lang" && exit 1 ;;
+  esac
+}
+
+select_language() {
+  local languages language
+  languages=("$_lang_cpp" "$_lang_go" "$_lang_py" "$_lang_php")
+  select language in $languages; do
+    [ -n "$language" ] && break
+  done
+  echo "$language"
+}
+
+# ////////////////////////////////////////////////////////////////
+# AtCoder
+# ////////////////////////////////////////////////////////////////
+
+function atcoder_get_root_dir() {
+  echo "$_src_dir/atcoder"
+}
+
+function atcoder_get_template_file() {
+  local lang="$1"
+  echo "$(atcoder_get_root_dir)/template$(lang_to_ext "$lang")"
+}
+
+function atcoder_url_pattern() {
+  echo '^https:\/\/atcoder.jp\/contests\/\([a-zA-Z0-9_-]*\)\/tasks\/\([a-zA-Z0-9_-]*\)$'
+}
+
+function atcoder_url_match() {
+  local url="$1"
+  regex_match "$(atcoder_url_pattern)" "$url"
+}
+
+function atcoder_url_get_contest_id() {
+  local url="$1"
+  regex_replace "$(atcoder_url_pattern)" "\1" "$url" | lower
+}
+
+function atcoder_url_get_task_id() {
+  local url="$1"
+  regex_replace "$(atcoder_url_pattern)" "\2" "$url" | lower
+}
+
+function atcoder_url_get_task_dir() {
+  local url="$1"
+  local contest task
+  contest="$(atcoder_url_get_contest_id "$url")"
+  task="$(atcoder_url_get_task_id "$url")"
+  echo "$(atcoder_get_root_dir)/$contest/$task"
+}
+
+function atcoder_task_get_new_answer_file() {
+  local task_dir="$1" lang="$2"
+  local ext index
+  ext="$(lang_to_ext "$lang")"
+  index="$(find "$task_dir" -maxdepth 1 -type f -name "*$ext" | wc -l | awk '{ print $1 }')"
+
+  echo "$task_dir/main_$index$ext"
+}
+
+function atcoder_task_get_answer_file() {
+  local task_dir="$1"
+  local answer
+  select answer in $(find "$task_dir" -maxdepth 1 -type f); do
+    [ -n "$answer" ] && break
+  done
+  echo "$answer"
+}
+
+function atcoder_task_get_testcase_dir() {
+  local task_dir="$1"
+  echo "$task_dir/test"
+}
+
+# ////////////////////////////////////////////////////////////////
+# Runner
+# ////////////////////////////////////////////////////////////////
+
+build() {
+  local cxx cxxflags src target
+
+  cxx="/usr/local/bin/g++-9"
+  cxxflags=($(cat "$_script_dir/../compile_flags.txt"))
+  src="$(realpath "$1")"
+  target="${src%.*}"
+
+  $cxx ${cxxflags[*]} "$src" -o "$target"
+
+  echo "$target"
+}
+
+run_tests() {
+  local red='\033[0;31m' green='\033[0;32m' nocolor='\033[0m'
+  local target="$1" testcase_dir="$2"
+
+  cols() { tput cols; }
+
+  str_repeat() { seq -f "$1" -s "" "$2"; }
+
+  bar() { echo "$(str_repeat "$1" "$(cols)")"; }
+
+  assert() {
+    local target="$1" in="$2" out="$3"
+    local actual result_diff result_status message
+
+    actual="$(mktemp)"
+    trap "rm -f $actual" EXIT
+    $target <"$in" >"$actual"
+
+    result_diff="$(sdiff "$out" "$actual" -w "$(cols)")"
+    result_status=$?
+    if [ $result_status -eq 0 ]; then
+      message="${green}OK${nocolor}"
+    else
+      message="${red}NG${nocolor}"
+    fi
+
+    bar "-"
+    echo Input:
+    echo "$(cat $in)"
+    echo
+    echo Output:
+    echo $result_diff
+    echo
+    echo Status:
+    echo $message
+    bar "-"
+
+    return $result_status
   }
 
-  if is_atcoder "$1"; then
-    local url="$1"
-    sub_new_atcoder "$url"
+  in_file() { echo "$testcase_dir/sample-$1.in"; }
+
+  out_file() { echo "$testcase_dir/sample-$1.out"; }
+
+  local i=1 result_status n_ok=0 n_ng=0
+  while [ -f "$(in_file $i)" ] && [ -f "$(out_file $i)" ]; do
+    assert "$target" "$(in_file $i)" "$(out_file $i)"
+    if [ $? -eq 0 ]; then
+      n_ok=$((n_ok + 1))
+    else
+      n_ng=$((n_ng + 1))
+    fi
+    i=$((i + 1))
+  done
+
+  bar "="
+  [ $n_ok -gt 0 ] && echo "${green}${n_ok}${nocolor} passed."
+  [ $n_ng -gt 0 ] && echo "${red}${n_ng}${nocolor} failed."
+  bar "="
+}
+
+# ////////////////////////////////////////////////////////////////
+# Commands
+# ////////////////////////////////////////////////////////////////
+
+new_command() {
+  new_atcoder() {
+    local url="$1" lang="$2"
+    local task_dir template_file new_answer_file testcase_dir
+
+    [ -z "$lang" ] && lang="$(select_language)"
+
+    task_dir="$(atcoder_url_get_task_dir "$url")"
+    template_file="$(atcoder_get_template_file "$lang")"
+    new_answer_file="$(atcoder_task_get_new_answer_file "$task_dir" "$lang")"
+    testcase_dir="$(atcoder_task_get_testcase_dir "$task_dir")"
+
+    mkdir -p "$task_dir" &&
+      cp "$template_file" "$new_answer_file" &&
+      shift &&
+      oj d "$url" -d "$testcase_dir" "$@"
+  }
+
+  if atcoder_url_match "$1"; then
+    new_atcoder "$1"
   else
     echo "unsupported format: $1" && exit 1
   fi
 }
 
-sub_test() {
+test_command() {
   test_atcoder() {
     local url="$1"
-    local contest task answer_dir answer_file testcase_dir target
-
-    read -r contest task <<<"$(parse_atcoder_url "$url")"
-    answer_dir="$(atcoder_answer_dir "$contest" "$task")"
-    answer_file="$answer_dir/main.cpp"
-    testcase_dir="$answer_dir/test"
+    local task_dir answer_file testcase_dir target
+    task_dir="$(atcoder_url_get_task_dir "$url")"
+    answer_file="$(atcoder_task_get_answer_file "$task_dir")"
+    testcase_dir="$(atcoder_task_get_testcase_dir "$task_dir")"
 
     target="$(build "$answer_file")"
     trap "rm -f $target" EXIT
@@ -51,11 +238,10 @@ sub_test() {
   }
 
   test_local() {
-    local answer_file="$1"
-    local answer_dir testcase_dir target
-
-    answer_dir="$(dirname "$answer_file")"
-    testcase_dir="$answer_dir/test"
+    local task_dir answer_file testcase_dir target
+    task_dir="$(realpath "$1")"
+    answer_file="$(atcoder_task_get_answer_file "$task_dir")"
+    testcase_dir="$(atcoder_task_get_testcase_dir "$task_dir")"
 
     target="$(build "$answer_file")"
     trap "rm -f $target" EXIT
@@ -63,7 +249,7 @@ sub_test() {
     run_tests "$target" "$testcase_dir"
   }
 
-  if is_atcoder "$1"; then
+  if atcoder_url_match "$1"; then
     test_atcoder "$1"
   elif [ -f "$1" ]; then
     test_local "$1"
@@ -72,28 +258,30 @@ sub_test() {
   fi
 }
 
-sub_submit() {
+submit_command() {
   submit_atcoder() {
     local url="$1"
-    local contest task answer_file
+    local task_dir answer_file
+    task_dir="$(atcoder_url_get_task_dir "$url")"
+    answer_file="$(atcoder_task_get_answer_file "$task_dir")"
 
-    read -r contest task <<<"$(parse_atcoder_url "$url")"
-    answer_dir="$(atcoder_answer_dir "$contest" "$task")"
-    answer_file="$answer_dir/main.cpp"
-
-    shift && oj s -y "$url" "$answer_file" "$@"
+    shift && oj s "$url" "$answer_file" -y "$@"
   }
 
-  if is_atcoder "$1"; then
+  if atcoder_url_match "$1"; then
     submit_atcoder "$1"
   else
     echo "unsupported format: $1" && exit 1
   fi
 }
 
+# ////////////////////////////////////////////////////////////////
+# Main
+# ////////////////////////////////////////////////////////////////
+
 case "$1" in
-n | new) shift 1 && sub_new "$@" && exit 0 ;;
-t | test) shift 1 && sub_test "$@" && exit 0 ;;
-s | submit) shift 1 && sub_submit "$@" && exit 0 ;;
+n | new) shift 1 && new_command "$@" && exit 0 ;;
+t | test) shift 1 && test_command "$@" && exit 0 ;;
+s | submit) shift 1 && submit_command "$@" && exit 0 ;;
 *) echo "unknown command: $1" && exit 1 ;;
 esac
