@@ -7,11 +7,7 @@
 g_script_dir="$(dirname "$0")"
 g_src_dir="$(pwd)/src"
 
-g_language_cpp="cpp"
-g_language_go="go"
-g_language_py="py"
-g_language_php="php"
-g_languages=("$g_language_cpp" "$g_language_go" "$g_language_py" "$g_language_php")
+g_languages=("cpp" "go" "py" "php")
 
 fzf="$g_script_dir/fzf"
 
