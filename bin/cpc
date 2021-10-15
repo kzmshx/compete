@@ -47,7 +47,7 @@ lang_to_ext() {
 select_language() {
   local languages language
   languages=("$_lang_cpp" "$_lang_go" "$_lang_py" "$_lang_php")
-  select language in $languages; do
+  select language in ${languages[*]}; do
     [ -n "$language" ] && break
   done
   echo "$language"
