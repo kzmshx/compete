@@ -4,53 +4,45 @@
 # Globals
 # ////////////////////////////////////////////////////////////////
 
-_script_dir="$(dirname "$0")"
-_src_dir="$(pwd)/src"
+g_script_dir="$(dirname "$0")"
+g_src_dir="$(pwd)/src"
 
-_lang_cpp="cpp"
-_lang_go="go"
-_lang_py="py"
-_lang_php="php"
+g_language_cpp="cpp"
+g_language_go="go"
+g_language_py="py"
+g_language_php="php"
+g_languages=("$g_language_cpp" "$g_language_go" "$g_language_py" "$g_language_php")
 
-_ext_cpp=".cpp"
-_ext_go=".go"
-_ext_py=".py"
-_ext_php=".php"
+fzf="$g_script_dir/fzf"
 
 # ////////////////////////////////////////////////////////////////
 # Utils
 # ////////////////////////////////////////////////////////////////
 
-lower() { cat - | tr '[:upper:]' '[:lower:]'; }
+function lower() { cat - | tr '[:upper:]' '[:lower:]'; }
 
-regex_match() {
+function regex_match() {
   local pattern="$1" string="$2"
   expr "$string" : "$pattern" >/dev/null
 }
 
-regex_replace() {
+function regex_replace() {
   local pattern="$1" replacement="$2" string="$3"
   echo "$string" | sed "s/$pattern/$replacement/"
 }
 
-lang_to_ext() {
-  local lang="$1"
-  case $lang in
-  "$_lang_cpp") echo "$_ext_cpp" ;;
-    #  "$_lang_go") echo "$_ext_go" ;;
-    #  "$_lang_py") echo "$_ext_py" ;;
-    #  "$_lang_php") echo "$_ext_php" ;;
-  *) echo "unsupported language code: $lang" && exit 1 ;;
-  esac
+function language_to_ext() {
+  local language="$1"
+  echo ".$language"
 }
 
-select_language() {
-  local languages language
-  languages=("$_lang_cpp" "$_lang_go" "$_lang_py" "$_lang_php")
-  select language in ${languages[*]}; do
-    [ -n "$language" ] && break
-  done
-  echo "$language"
+function validate_language() {
+  local language="$1"
+  [ -n "$language" ] && printf "%s\n" "${g_languages[@]}" | grep -q "$language"
+}
+
+function select_language() {
+  printf "%s\n" "${g_languages[@]}" | $fzf
 }
 
 # ////////////////////////////////////////////////////////////////
@@ -58,12 +50,12 @@ select_language() {
 # ////////////////////////////////////////////////////////////////
 
 function atcoder_get_root_dir() {
-  echo "$_src_dir/atcoder"
+  echo "$g_src_dir/atcoder"
 }
 
-function atcoder_get_template_file() {
-  local lang="$1"
-  echo "$(atcoder_get_root_dir)/template$(lang_to_ext "$lang")"
+function atcoder_get_template() {
+  local language="$1"
+  echo "$(atcoder_get_root_dir)/template$(language_to_ext "$language")"
 }
 
 function atcoder_url_pattern() {
@@ -87,33 +79,29 @@ function atcoder_url_get_task_id() {
 
 function atcoder_url_get_task_dir() {
   local url="$1"
-  local contest task
-  contest="$(atcoder_url_get_contest_id "$url")"
-  task="$(atcoder_url_get_task_id "$url")"
-  echo "$(atcoder_get_root_dir)/$contest/$task"
-}
-
-function atcoder_task_get_new_answer_file() {
-  local task_dir="$1" lang="$2"
-  local ext index
-  ext="$(lang_to_ext "$lang")"
-  index="$(find "$task_dir" -maxdepth 1 -type f -name "*$ext" | wc -l | awk '{ print $1 }')"
-
-  echo "$task_dir/main_$index$ext"
-}
-
-function atcoder_task_get_answer_file() {
-  local task_dir="$1"
-  local answer
-  select answer in $(find "$task_dir" -maxdepth 1 -type f); do
-    [ -n "$answer" ] && break
-  done
-  echo "$answer"
+  local contest_id task_id
+  contest_id="$(atcoder_url_get_contest_id "$url")"
+  task_id="$(atcoder_url_get_task_id "$url")"
+  echo "$(atcoder_get_root_dir)/$contest_id/$task_id"
 }
 
 function atcoder_task_get_testcase_dir() {
   local task_dir="$1"
   echo "$task_dir/test"
+}
+
+function atcoder_task_create_new_answer() {
+  local task_dir="$1" language="$2"
+  local ext index
+  ext="$(language_to_ext "$language")"
+  index="$(find "$task_dir" -maxdepth 1 -type f -name "*$ext" | wc -l | awk '{ print $1 }')"
+
+  echo "$task_dir/main_$index$ext"
+}
+
+function atcoder_task_select_answer() {
+  local task_dir="$1"
+  find "$task_dir" -maxdepth 1 -type f | $fzf
 }
 
 # ////////////////////////////////////////////////////////////////
@@ -124,7 +112,7 @@ build() {
   local cxx cxxflags src target
 
   cxx="/usr/local/bin/g++-9"
-  cxxflags=($(cat "$_script_dir/../compile_flags.txt"))
+  cxxflags=($(cat "$g_script_dir/../compile_flags.txt"))
   src="$(realpath "$1")"
   target="${src%.*}"
 
@@ -200,24 +188,25 @@ run_tests() {
 
 new_command() {
   new_atcoder() {
-    local url="$1" lang="$2"
-    local task_dir template_file new_answer_file testcase_dir
+    local url="$1" language="$2"
 
-    [ -z "$lang" ] && lang="$(select_language)"
+    local task_dir template new_answer testcase_dir
+
+    ! validate_language "$language" && language="$(select_language)"
 
     task_dir="$(atcoder_url_get_task_dir "$url")"
-    template_file="$(atcoder_get_template_file "$lang")"
-    new_answer_file="$(atcoder_task_get_new_answer_file "$task_dir" "$lang")"
+    template="$(atcoder_get_template "$language")"
+    new_answer="$(atcoder_task_create_new_answer "$task_dir" "$language")"
     testcase_dir="$(atcoder_task_get_testcase_dir "$task_dir")"
 
     mkdir -p "$task_dir" &&
-      cp "$template_file" "$new_answer_file" &&
-      shift &&
+      cp "$template" "$new_answer" &&
+      shift 2 &&
       oj d "$url" -d "$testcase_dir" "$@"
   }
 
   if atcoder_url_match "$1"; then
-    new_atcoder "$1"
+    new_atcoder "$1" "$2"
   else
     echo "unsupported format: $1" && exit 1
   fi
@@ -226,24 +215,24 @@ new_command() {
 test_command() {
   test_atcoder() {
     local url="$1"
-    local task_dir answer_file testcase_dir target
+    local task_dir answer testcase_dir target
     task_dir="$(atcoder_url_get_task_dir "$url")"
-    answer_file="$(atcoder_task_get_answer_file "$task_dir")"
+    answer="$(atcoder_task_select_answer "$task_dir")"
     testcase_dir="$(atcoder_task_get_testcase_dir "$task_dir")"
 
-    target="$(build "$answer_file")"
+    target="$(build "$answer")"
     trap "rm -f $target" EXIT
 
     run_tests "$target" "$testcase_dir"
   }
 
   test_local() {
-    local task_dir answer_file testcase_dir target
+    local task_dir answer testcase_dir target
     task_dir="$(realpath "$1")"
-    answer_file="$(atcoder_task_get_answer_file "$task_dir")"
+    answer="$(atcoder_task_select_answer "$task_dir")"
     testcase_dir="$(atcoder_task_get_testcase_dir "$task_dir")"
 
-    target="$(build "$answer_file")"
+    target="$(build "$answer")"
     trap "rm -f $target" EXIT
 
     run_tests "$target" "$testcase_dir"
@@ -261,11 +250,11 @@ test_command() {
 submit_command() {
   submit_atcoder() {
     local url="$1"
-    local task_dir answer_file
+    local task_dir answer
     task_dir="$(atcoder_url_get_task_dir "$url")"
-    answer_file="$(atcoder_task_get_answer_file "$task_dir")"
+    answer="$(atcoder_task_select_answer "$task_dir")"
 
-    shift && oj s "$url" "$answer_file" -y "$@"
+    shift && oj s "$url" "$answer" -y "$@"
   }
 
   if atcoder_url_match "$1"; then
