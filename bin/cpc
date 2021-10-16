@@ -7,7 +7,7 @@
 g_script_dir="$(dirname "$0")"
 g_src_dir="$(pwd)/src"
 
-g_languages=("cpp" "go" "py" "php")
+g_languages=("cpp")
 
 fzf="$g_script_dir/fzf"
 
@@ -27,14 +27,9 @@ function regex_replace() {
   echo "$string" | sed "s/$pattern/$replacement/"
 }
 
-function language_to_ext() {
-  local language="$1"
-  echo ".$language"
-}
-
 function validate_language() {
   local language="$1"
-  [ -n "$language" ] && printf "%s\n" "${g_languages[@]}" | grep -q "$language"
+  [ -n "$language" ] && printf "%s\n" "${g_languages[@]}" | grep -q -E "^$language$"
 }
 
 function select_language() {
@@ -51,7 +46,8 @@ function atcoder_get_root_dir() {
 
 function atcoder_get_template() {
   local language="$1"
-  echo "$(atcoder_get_root_dir)/template$(language_to_ext "$language")"
+  ! validate_language "$language" && echo "unsupported language: $language" && exit 1
+  echo "$(atcoder_get_root_dir)/template.$language"
 }
 
 function atcoder_url_pattern() {
@@ -88,11 +84,9 @@ function atcoder_task_get_testcase_dir() {
 
 function atcoder_task_create_new_answer() {
   local task_dir="$1" language="$2"
-  local ext index
-  ext="$(language_to_ext "$language")"
-  index="$(find "$task_dir" -maxdepth 1 -type f -name "*$ext" | wc -l | awk '{ print $1 }')"
-
-  echo "$task_dir/main_$index$ext"
+  local index
+  index="$(find "$task_dir" -maxdepth 1 -type f -name "*.$language" | wc -l | awk '{ print $1 }')"
+  echo "$task_dir/main_$index.$language"
 }
 
 function atcoder_task_select_answer() {
@@ -103,6 +97,31 @@ function atcoder_task_select_answer() {
 # ////////////////////////////////////////////////////////////////
 # Runner
 # ////////////////////////////////////////////////////////////////
+
+function run_cpp() {
+  local src="$1" in="$2" out="$3"
+  local dest="${src%.*}"
+
+  [[ ! "$src" =~ ^/.* ]] && echo "src must be abstract path: $src" && exit 1
+
+  function build() {
+    local cxx cxxflags
+    cxx="/usr/local/bin/g++-9"
+    cxxflags=($(cat "$g_script_dir/../compile_flags.txt"))
+
+    $cxx "$src" -o "$dest" "${cxxflags[*]}"
+  }
+
+  function run() {
+    $dest <"$in" >"$out"
+  }
+
+  function clean() {
+    rm -f "$dest"
+  }
+
+  build && trap clean EXIT && run
+}
 
 build() {
   local cxx cxxflags src target
@@ -186,9 +205,11 @@ new_command() {
   new_atcoder() {
     local url="$1" language="$2"
 
-    local task_dir template new_answer testcase_dir
+    if ! validate_language "$language"; then
+      language="$(select_language)"
+    fi
 
-    ! validate_language "$language" && language="$(select_language)"
+    local task_dir template new_answer testcase_dir
 
     task_dir="$(atcoder_url_get_task_dir "$url")"
     template="$(atcoder_get_template "$language")"
@@ -197,9 +218,10 @@ new_command() {
 
     mkdir -p "$task_dir" &&
       cp "$template" "$new_answer" &&
-      shift 2 &&
-      oj d "$url" -d "$testcase_dir" "$@"
+      oj d "$url" -d "$testcase_dir"
   }
+
+  [ $# -lt 1 ] && echo "too few arguments" && exit 1
 
   if atcoder_url_match "$1"; then
     new_atcoder "$1" "$2"
@@ -223,8 +245,9 @@ test_command() {
   }
 
   test_local() {
-    local task_dir answer testcase_dir target
-    task_dir="$(realpath "$1")"
+    local task_dir="$1"
+    local answer testcase_dir target
+    task_dir="$(realpath "$task_dir")"
     answer="$(atcoder_task_select_answer "$task_dir")"
     testcase_dir="$(atcoder_task_get_testcase_dir "$task_dir")"
 
@@ -233,6 +256,8 @@ test_command() {
 
     run_tests "$target" "$testcase_dir"
   }
+
+  [ $# -lt 1 ] && echo "too few arguments" && exit 1
 
   if atcoder_url_match "$1"; then
     test_atcoder "$1"
@@ -250,8 +275,10 @@ submit_command() {
     task_dir="$(atcoder_url_get_task_dir "$url")"
     answer="$(atcoder_task_select_answer "$task_dir")"
 
-    shift && oj s "$url" "$answer" -y "$@"
+    oj s "$url" "$answer" -y
   }
+
+  [ $# -lt 1 ] && echo "too few arguments" && exit 1
 
   if atcoder_url_match "$1"; then
     submit_atcoder "$1"
@@ -265,8 +292,8 @@ submit_command() {
 # ////////////////////////////////////////////////////////////////
 
 case "$1" in
-n | new) shift 1 && new_command "$@" && exit 0 ;;
-t | test) shift 1 && test_command "$@" && exit 0 ;;
-s | submit) shift 1 && submit_command "$@" && exit 0 ;;
+n | new) shift && new_command "$@" && exit 0 ;;
+t | test) shift && test_command "$@" && exit 0 ;;
+s | submit) shift && submit_command "$@" && exit 0 ;;
 *) echo "unknown command: $1" && exit 1 ;;
 esac
