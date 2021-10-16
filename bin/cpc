@@ -201,8 +201,8 @@ run_tests() {
 # Commands
 # ////////////////////////////////////////////////////////////////
 
-new_command() {
-  new_atcoder() {
+function new_command() {
+  function new_atcoder() {
     local url="$1" language="$2"
 
     if ! validate_language "$language"; then
@@ -230,8 +230,8 @@ new_command() {
   fi
 }
 
-test_command() {
-  test_atcoder() {
+function test_command() {
+  function test_atcoder() {
     local url="$1"
     local task_dir answer testcase_dir target
     task_dir="$(atcoder_url_get_task_dir "$url")"
@@ -244,7 +244,7 @@ test_command() {
     run_tests "$target" "$testcase_dir"
   }
 
-  test_local() {
+  function test_local() {
     local task_dir="$1"
     local answer testcase_dir target
     task_dir="$(realpath "$task_dir")"
@@ -268,8 +268,8 @@ test_command() {
   fi
 }
 
-submit_command() {
-  submit_atcoder() {
+function submit_command() {
+  function submit_atcoder() {
     local url="$1"
     local task_dir answer
     task_dir="$(atcoder_url_get_task_dir "$url")"
