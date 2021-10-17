@@ -163,7 +163,8 @@ function run_tests() {
       function report_summary() {
         local ok="$1" ng="$2"
         bar "="
-        echo "$(green)$ok$(nc) passed, $(red)$ng$(nc) failed."
+        [ $ok -gt 0 ] && echo "$(green)$ok$(nc) passed."
+        [ $ng -gt 0 ] && echo "$(red)$ng$(nc) failed."
         bar "="
       }
 
