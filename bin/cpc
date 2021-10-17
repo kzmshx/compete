@@ -115,8 +115,10 @@ function run_tests() {
       function cols() { tput cols; }
       function bar() { seq -f "$1" -s "" "$(cols)"; }
 
+      function print_time() { printf "%.3f millisecond" "$1"; }
+
       function report_ac() {
-        local result="$1"
+        local result="$1" runtime="$2"
         bar "-"
         echo "Input:"
         echo "$(cat "$input")"
@@ -125,11 +127,12 @@ function run_tests() {
         echo "$(cat "$result")"
         echo ""
         echo "Status: $(green)AC$(nc)"
+        echo "Time:   $(print_time "$runtime")"
         bar "-"
       }
 
       function report_wa() {
-        local result="$1"
+        local result="$1" runtime="$2"
         bar "-"
         echo "Input:"
         echo "$(cat "$input")"
@@ -138,6 +141,7 @@ function run_tests() {
         echo "$(cat "$result")"
         echo ""
         echo "Status: $(red)WA$(nc)"
+        echo "Time:   $(print_time "$runtime")"
         bar "-"
       }
 
@@ -156,7 +160,7 @@ function run_tests() {
         echo "$(cat "$input")"
         echo ""
         echo "Status: $(blue)TLE$(nc)"
-        echo "2 seconds exceeded."
+        echo "Time:   > 2000 millisecond"
         bar "-"
       }
 
@@ -172,8 +176,12 @@ function run_tests() {
       actual=$(mktemp)
       trap "rm -f $actual" EXIT
 
+      local start end runtime
+      start=$(gdate "+%s.%N")
       timeout 2 "$command" <"$input" >"$actual"
       local stat=$?
+      end=$(gdate "+%s.%N")
+      runtime=$(bc -l <<<"($end - $start) * 1000")
       if [ $stat -eq 124 ]; then
         report_tle && return 1
       elif [ $stat -ne 0 ]; then
@@ -185,10 +193,10 @@ function run_tests() {
       trap "rm -f $result" EXIT
 
       if ! sdiff "$expected" "$actual" -w "$(cols)" >"$result"; then
-        report_wa "$result" && return 1
+        report_wa "$result" "$runtime" && return 1
       fi
 
-      report_ac "$result" && return 0
+      report_ac "$result" "$runtime" && return 0
     }
 
     input() { echo "$testcase_dir/sample-$1.in"; }
