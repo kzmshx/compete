@@ -255,15 +255,16 @@ function new_command() {
       language=$(select_language)
     fi
 
-    local task_dir template new_answer testcase_dir
-
+    local task_dir
     task_dir=$(atcoder_url_get_task_dir "$url")
+    mkdir -p "$task_dir"
+
+    local template new_answer testcase_dir
     template=$(atcoder_get_template "$language")
     new_answer=$(atcoder_task_create_new_answer "$task_dir" "$language")
     testcase_dir=$(atcoder_task_get_testcase_dir "$task_dir")
 
-    mkdir -p "$task_dir" &&
-      cp "$template" "$new_answer" &&
+    cp "$template" "$new_answer" &&
       oj d "$url" -d "$testcase_dir"
   }
 
