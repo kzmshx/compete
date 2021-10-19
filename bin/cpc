@@ -107,13 +107,13 @@ function run_tests() {
     function judge() {
       local command="$1" input="$2" expected="$3"
 
-      function red() { tput setaf 1; }
-      function green() { tput setaf 2; }
-      function blue() { tput setaf 5; }
-      function nc() { tput sgr0; }
+      function red() { printf "\e[31m"; }
+      function green() { printf "\e[32m"; }
+      function blue() { printf "\e[36m"; }
+      function nc() { printf "\e[0m"; }
 
       function cols() { tput cols; }
-      function bar() { seq -f "$1" -s "" "$(cols)"; }
+      function bar() { echo $(seq -f "$1" -s "" "$(cols)"); }
 
       function print_time() { printf "%.3f millisecond" "$1"; }
 
@@ -240,6 +240,9 @@ function run_tests() {
       echo "error occurred when running test" && exit 1
     fi
     ;;
+  *)
+    echo "unsupported file: $answer" && exit 1
+    ;;
   esac
 }
 
@@ -288,7 +291,7 @@ function test_command() {
     run_tests "$answer" "$testcase_dir"
   }
 
-  function test_local() {
+  function test_by_task_dir() {
     local task_dir="$1"
     local answer testcase_dir
     task_dir=$(realpath "$task_dir")
@@ -298,12 +301,24 @@ function test_command() {
     run_tests "$answer" "$testcase_dir"
   }
 
+  function test_by_answer() {
+    local answer="$1"
+    local testcase_dir
+    answer=$(realpath "$answer")
+    task_dir=$(dirname "$answer")
+    testcase_dir=$(atcoder_task_get_testcase_dir "$task_dir")
+
+    run_tests "$answer" "$testcase_dir"
+  }
+
   [ $# -lt 1 ] && echo "too few arguments" && exit 1
 
   if atcoder_url_match "$1"; then
     test_atcoder "$1"
+  elif [ -d "$1" ]; then
+    test_by_task_dir "$1"
   elif [ -f "$1" ]; then
-    test_local "$1"
+    test_by_answer "$1"
   else
     echo "unsupported format: $1" && exit 1
   fi
