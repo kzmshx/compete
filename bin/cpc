@@ -104,73 +104,73 @@ function run_tests() {
   function run() {
     local command="$1" testcase_dir="$2"
 
+    function red() { printf "\e[31m"; }
+    function green() { printf "\e[32m"; }
+    function blue() { printf "\e[36m"; }
+    function nc() { printf "\e[0m"; }
+
+    function cols() { tput cols; }
+    function bar() { echo $(seq -f "$1" -s "" "$(cols)"); }
+    function print_time() { printf "%.3f millisecond" "$1"; }
+
+    function report_ac() {
+      local result="$1" runtime="$2"
+      bar "-"
+      echo "Input:"
+      echo "$(cat "$input")"
+      echo ""
+      echo "Output:"
+      echo "$(cat "$result")"
+      echo ""
+      echo "Status: $(green)AC$(nc)"
+      echo "Time:   $(print_time "$runtime")"
+      bar "-"
+    }
+
+    function report_wa() {
+      local result="$1" runtime="$2"
+      bar "-"
+      echo "Input:"
+      echo "$(cat "$input")"
+      echo ""
+      echo "Output:"
+      echo "$(cat "$result")"
+      echo ""
+      echo "Status: $(red)WA$(nc)"
+      echo "Time:   $(print_time "$runtime")"
+      bar "-"
+    }
+
+    function report_re() {
+      bar "-"
+      echo "Input:"
+      echo "$(cat "$input")"
+      echo ""
+      echo "Status: $(blue)RE$(nc)"
+      bar "-"
+    }
+
+    function report_tle() {
+      bar "-"
+      echo "Input:"
+      echo "$(cat "$input")"
+      echo ""
+      echo "Status: $(blue)TLE$(nc)"
+      echo "Time:   > 2000 millisecond"
+      bar "-"
+    }
+
+    function report_summary() {
+      local ok="$1" ng="$2"
+      bar "="
+      [ $ok -gt 0 ] && echo "$(green)$ok$(nc) passed."
+      [ $ng -gt 0 ] && echo "$(red)$ng$(nc) failed."
+      [ $ok -eq 0 ] && [ $ng -eq 0 ] && echo "There is no test case."
+      bar "="
+    }
+
     function judge() {
       local command="$1" input="$2" expected="$3"
-
-      function red() { printf "\e[31m"; }
-      function green() { printf "\e[32m"; }
-      function blue() { printf "\e[36m"; }
-      function nc() { printf "\e[0m"; }
-
-      function cols() { tput cols; }
-      function bar() { echo $(seq -f "$1" -s "" "$(cols)"); }
-
-      function print_time() { printf "%.3f millisecond" "$1"; }
-
-      function report_ac() {
-        local result="$1" runtime="$2"
-        bar "-"
-        echo "Input:"
-        echo "$(cat "$input")"
-        echo ""
-        echo "Output:"
-        echo "$(cat "$result")"
-        echo ""
-        echo "Status: $(green)AC$(nc)"
-        echo "Time:   $(print_time "$runtime")"
-        bar "-"
-      }
-
-      function report_wa() {
-        local result="$1" runtime="$2"
-        bar "-"
-        echo "Input:"
-        echo "$(cat "$input")"
-        echo ""
-        echo "Output:"
-        echo "$(cat "$result")"
-        echo ""
-        echo "Status: $(red)WA$(nc)"
-        echo "Time:   $(print_time "$runtime")"
-        bar "-"
-      }
-
-      function report_re() {
-        bar "-"
-        echo "Input:"
-        echo "$(cat "$input")"
-        echo ""
-        echo "Status: $(blue)RE$(nc)"
-        bar "-"
-      }
-
-      function report_tle() {
-        bar "-"
-        echo "Input:"
-        echo "$(cat "$input")"
-        echo ""
-        echo "Status: $(blue)TLE$(nc)"
-        echo "Time:   > 2000 millisecond"
-        bar "-"
-      }
-
-      function report_summary() {
-        local ok="$1" ng="$2"
-        bar "="
-        [ $ok -gt 0 ] && echo "$(green)$ok$(nc) passed."
-        [ $ng -gt 0 ] && echo "$(red)$ng$(nc) failed."
-        bar "="
-      }
 
       local actual
       actual=$(mktemp)
