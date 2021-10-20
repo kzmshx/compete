@@ -36,6 +36,11 @@ function select_language() {
   printf "%s\n" "${g_languages[@]}" | $fzf
 }
 
+function open_in_clion() {
+  local file="$1"
+  [ -f "$file" ] && type clion &>/dev/null && clion "$file"
+}
+
 # ////////////////////////////////////////////////////////////////
 # AtCoder
 # ////////////////////////////////////////////////////////////////
@@ -267,9 +272,9 @@ function new_command() {
     new_answer=$(atcoder_task_create_new_answer "$task_dir" "$language")
     testcase_dir=$(atcoder_task_get_testcase_dir "$task_dir")
 
-    cp "$template" "$new_answer" &&
-      oj d "$url" -d "$testcase_dir" &&
-      type clion &>/dev/null && clion "$new_answer"
+    cp "$template" "$new_answer" && oj d "$url" -d "$testcase_dir"
+
+    open_in_clion "$new_answer"
   }
 
   [ $# -lt 1 ] && echo "too few arguments" && exit 1
@@ -356,11 +361,8 @@ function add_testcase_command() {
     new_in="$testcase_dir/sample-$next_index.in"
     new_out="$testcase_dir/sample-$next_index.out"
 
-    touch "$new_in"
-    touch "$new_out"
-
-    clion "$new_in"
-    clion "$new_out"
+    touch "$new_in" && open_in_clion "$new_in"
+    touch "$new_out" && open_in_clion "$new_out"
   }
 
   function add_testcase_by_task_dir() {
@@ -374,11 +376,8 @@ function add_testcase_command() {
     new_in="$testcase_dir/sample-$next_index.in"
     new_out="$testcase_dir/sample-$next_index.out"
 
-    touch "$new_in"
-    touch "$new_out"
-
-    clion "$new_in"
-    clion "$new_out"
+    touch "$new_in" && open_in_clion "$new_in"
+    touch "$new_out" && open_in_clion "$new_out"
   }
 
   [ $# -lt 1 ] && echo "too few arguments" && exit 1
