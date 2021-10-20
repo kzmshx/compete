@@ -344,6 +344,54 @@ function submit_command() {
   fi
 }
 
+function add_testcase_command() {
+  function add_testcase_atcoder() {
+    local url="$1"
+    local task_dir testcase_dir index next_index new_in new_out
+    task_dir=$(atcoder_url_get_task_dir "$url")
+    testcase_dir=$(atcoder_task_get_testcase_dir "$task_dir")
+
+    index=$(find "$testcase_dir" -type f -name '*sample-*.out' | wc -l | awk '{ print $1 }')
+    next_index=$((index + 1))
+    new_in="$testcase_dir/sample-$next_index.in"
+    new_out="$testcase_dir/sample-$next_index.out"
+
+    touch "$new_in"
+    touch "$new_out"
+
+    clion "$new_in"
+    clion "$new_out"
+  }
+
+  function add_testcase_by_task_dir() {
+    local task_dir="$1"
+    local testcase_dir
+    task_dir=$(realpath "$task_dir")
+    testcase_dir=$(atcoder_task_get_testcase_dir "$task_dir")
+
+    index=$(find "$testcase_dir" -type f -name '*sample-*.out' | wc -l | awk '{ print $1 }')
+    next_index=$((index + 1))
+    new_in="$testcase_dir/sample-$next_index.in"
+    new_out="$testcase_dir/sample-$next_index.out"
+
+    touch "$new_in"
+    touch "$new_out"
+
+    clion "$new_in"
+    clion "$new_out"
+  }
+
+  [ $# -lt 1 ] && echo "too few arguments" && exit 1
+
+  if atcoder_url_match "$1"; then
+    add_testcase_atcoder "$1"
+  elif [ -d "$1" ]; then
+    add_testcase_by_task_dir "$1"
+  else
+    echo "unsupported format: $1" && exit 1
+  fi
+}
+
 # ////////////////////////////////////////////////////////////////
 # Main
 # ////////////////////////////////////////////////////////////////
@@ -352,5 +400,6 @@ case "$1" in
 n | new) shift && new_command "$@" && exit 0 ;;
 t | test) shift && test_command "$@" && exit 0 ;;
 s | submit) shift && submit_command "$@" && exit 0 ;;
+c | add-testcase) shift && add_testcase_command "$@" && exit 0 ;;
 *) echo "unknown command: $1" && exit 1 ;;
 esac
