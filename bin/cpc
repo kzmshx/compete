@@ -268,7 +268,8 @@ function new_command() {
     testcase_dir=$(atcoder_task_get_testcase_dir "$task_dir")
 
     cp "$template" "$new_answer" &&
-      oj d "$url" -d "$testcase_dir"
+      oj d "$url" -d "$testcase_dir" &&
+      type clion &>/dev/null && clion "$new_answer"
   }
 
   [ $# -lt 1 ] && echo "too few arguments" && exit 1
