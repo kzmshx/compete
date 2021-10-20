@@ -287,47 +287,26 @@ function new_command() {
 }
 
 function test_command() {
-  function test_atcoder() {
-    local url="$1"
-    local task_dir answer testcase_dir
-    task_dir=$(atcoder_url_get_task_dir "$url")
-    answer=$(atcoder_task_select_answer "$task_dir")
-    testcase_dir=$(atcoder_task_get_testcase_dir "$task_dir")
-
-    run_tests "$answer" "$testcase_dir"
-  }
-
-  function test_by_task_dir() {
-    local task_dir="$1"
-    local answer testcase_dir
-    task_dir=$(realpath "$task_dir")
-    answer=$(atcoder_task_select_answer "$task_dir")
-    testcase_dir=$(atcoder_task_get_testcase_dir "$task_dir")
-
-    run_tests "$answer" "$testcase_dir"
-  }
-
-  function test_by_answer() {
-    local answer="$1"
-    local testcase_dir
-    answer=$(realpath "$answer")
-    task_dir=$(dirname "$answer")
-    testcase_dir=$(atcoder_task_get_testcase_dir "$task_dir")
-
-    run_tests "$answer" "$testcase_dir"
-  }
+  local task_dir answer testcase_dir
 
   [ $# -lt 1 ] && echo "too few arguments" && exit 1
 
   if atcoder_url_match "$1"; then
-    test_atcoder "$1"
+    task_dir=$(atcoder_url_get_task_dir "$1")
+    answer=$(atcoder_task_select_answer "$task_dir")
   elif [ -d "$1" ]; then
-    test_by_task_dir "$1"
+    task_dir=$(realpath "$1")
+    answer=$(atcoder_task_select_answer "$task_dir")
   elif [ -f "$1" ]; then
-    test_by_answer "$1"
+    answer=$(realpath "$1")
+    task_dir=$(dirname "$answer")
   else
     echo "unsupported format: $1" && exit 1
   fi
+
+  testcase_dir=$(atcoder_task_get_testcase_dir "$task_dir")
+
+  run_tests "$answer" "$testcase_dir"
 }
 
 function submit_command() {
@@ -350,45 +329,26 @@ function submit_command() {
 }
 
 function add_testcase_command() {
-  function add_testcase_atcoder() {
-    local url="$1"
-    local task_dir testcase_dir index next_index new_in new_out
-    task_dir=$(atcoder_url_get_task_dir "$url")
-    testcase_dir=$(atcoder_task_get_testcase_dir "$task_dir")
-
-    index=$(find "$testcase_dir" -type f -name '*sample-*.out' | wc -l | awk '{ print $1 }')
-    next_index=$((index + 1))
-    new_in="$testcase_dir/sample-$next_index.in"
-    new_out="$testcase_dir/sample-$next_index.out"
-
-    touch "$new_in" && open_in_clion "$new_in"
-    touch "$new_out" && open_in_clion "$new_out"
-  }
-
-  function add_testcase_by_task_dir() {
-    local task_dir="$1"
-    local testcase_dir
-    task_dir=$(realpath "$task_dir")
-    testcase_dir=$(atcoder_task_get_testcase_dir "$task_dir")
-
-    index=$(find "$testcase_dir" -type f -name '*sample-*.out' | wc -l | awk '{ print $1 }')
-    next_index=$((index + 1))
-    new_in="$testcase_dir/sample-$next_index.in"
-    new_out="$testcase_dir/sample-$next_index.out"
-
-    touch "$new_in" && open_in_clion "$new_in"
-    touch "$new_out" && open_in_clion "$new_out"
-  }
+  local task_dir testcase_dir index next_index new_in new_out
 
   [ $# -lt 1 ] && echo "too few arguments" && exit 1
 
   if atcoder_url_match "$1"; then
-    add_testcase_atcoder "$1"
+    task_dir=$(atcoder_url_get_task_dir "$1")
   elif [ -d "$1" ]; then
-    add_testcase_by_task_dir "$1"
+    task_dir=$(realpath "$1")
   else
     echo "unsupported format: $1" && exit 1
   fi
+
+  testcase_dir=$(atcoder_task_get_testcase_dir "$task_dir")
+  index=$(find "$testcase_dir" -type f -name '*sample-*.out' | wc -l | awk '{ print $1 }')
+  next_index=$((index + 1))
+  new_in="$testcase_dir/sample-$next_index.in"
+  new_out="$testcase_dir/sample-$next_index.out"
+
+  touch "$new_in" && open_in_clion "$new_in"
+  touch "$new_out" && open_in_clion "$new_out"
 }
 
 # ////////////////////////////////////////////////////////////////
