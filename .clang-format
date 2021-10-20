@@ -39,7 +39,7 @@ CompactNamespaces: false
 ContinuationIndentWidth: 4
 IndentCaseLabels: false
 IndentPPDirectives: None
-IndentWidth: 2
+IndentWidth: 4
 InsertTrailingCommas: None
 KeepEmptyLinesAtTheStartOfBlocks: true
 MaxEmptyLinesToKeep: 1
