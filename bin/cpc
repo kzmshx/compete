@@ -103,6 +103,16 @@ function atcoder_task_select_answer() {
 # Test Runner
 # ////////////////////////////////////////////////////////////////
 
+function build_cpp() {
+  local src="$1" dest="$2"
+
+  local cxx cxxflags
+  cxx="/usr/local/bin/g++-9"
+  cxxflags=($(cat "$g_script_dir/../compile_flags.txt"))
+
+  $cxx "$src" -o "$dest" ${cxxflags[*]}
+}
+
 function run_tests() {
   local answer="$1" testcase_dir="$2"
 
@@ -217,16 +227,6 @@ function run_tests() {
       i=$((i + 1))
     done
     report_summary $ok $ng
-  }
-
-  function build_cpp() {
-    local src="$1" dest="$2"
-
-    local cxx cxxflags
-    cxx="/usr/local/bin/g++-9"
-    cxxflags=($(cat "$g_script_dir/../compile_flags.txt"))
-
-    $cxx "$src" -o "$dest" ${cxxflags[*]}
   }
 
   local extension
@@ -351,6 +351,19 @@ function add_testcase_command() {
   touch "$new_out" && open_in_clion "$new_out"
 }
 
+function run_cpp_command() {
+  [ $# -lt 1 ] && echo "too few arguments" && exit 1
+  [ ! -f "$1" ] && echo "no such file" && exit 1
+
+  local answer="$1"
+  local dest="${answer%.*}"
+
+  build_cpp "$answer" "$dest"
+  trap "rm -f $dest" EXIT
+
+  "$dest"
+}
+
 # ////////////////////////////////////////////////////////////////
 # Main
 # ////////////////////////////////////////////////////////////////
@@ -360,5 +373,6 @@ n | new) shift && new_command "$@" && exit 0 ;;
 t | test) shift && test_command "$@" && exit 0 ;;
 s | submit) shift && submit_command "$@" && exit 0 ;;
 c | add-testcase) shift && add_testcase_command "$@" && exit 0 ;;
+run-cpp) shift && run_cpp_command "$@" && exit 0 ;;
 *) echo "unknown command: $1" && exit 1 ;;
 esac
