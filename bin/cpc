@@ -107,7 +107,7 @@ function build_cpp() {
   local src="$1" dest="$2"
 
   local cxx cxxflags
-  cxx="/usr/local/bin/g++-9"
+  cxx="g++"
   cxxflags=($(cat "$g_script_dir/../compile_flags.txt"))
 
   $cxx "$src" -o "$dest" ${cxxflags[*]}

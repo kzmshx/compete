@@ -1,9 +1,10 @@
 -std=gnu++17
 
--I/usr/local/opt/gcc@9/include/c++/9.4.0
--I/usr/local/opt/gcc@9/include/c++/9.4.0/x86_64-apple-darwin20
--I/usr/local/opt/boost/include
--L/usr/local/opt/boost/lib
+-I/opt/homebrew/Cellar/gcc/11.2.0_1/include/c++/11.1.0
+-I/opt/homebrew/Cellar/gcc/11.2.0_1/include/c++/11.1.0/aarch64-apple-darwin20
+-I/opt/homebrew/Cellar/boost/1.76.0/include
+
+-L/opt/homebrew/Cellar/boost/1.76.0/lib
 
 -pedantic
 -Wall
@@ -19,7 +20,5 @@
 -D_GLIBCXX_DEBUG
 -D_GLIBCXX_DEBUG_PEDANTIC
 -D_FORTIFY_SOURCE=2
--fsanitize=address
--fsanitize=undefined
 -fno-sanitize-recover
 -fstack-protector
