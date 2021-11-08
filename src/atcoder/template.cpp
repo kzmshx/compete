@@ -36,5 +36,13 @@ bool is_prime(const T &integer) {
     return true;
 }
 
+void run();
+
 int main() {
+    cin.tie(0);
+    ios::sync_with_stdio(false);
+    run();
+}
+
+void run() {
 }
