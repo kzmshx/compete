@@ -8,7 +8,6 @@
 
 -pedantic
 -Wall
--Wconversion
 -Wduplicated-cond
 -Wextra
 -Wfloat-equal
