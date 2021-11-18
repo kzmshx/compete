@@ -1,6 +1,8 @@
 #include <bits/stdc++.h>
 
 using namespace std;
+using i32 = int32_t;
+using i64 = int64_t;
 
 template<typename T>
 bool choose_min(T &min, const T &value) {
