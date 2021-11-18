@@ -2,6 +2,9 @@
 
 using namespace std;
 
+using i32 = int32_t;
+using i64 = int64_t;
+
 template<typename T>
 bool choose_min(T &min, const T &value) {
     if (min > value) {
@@ -45,25 +48,25 @@ int main() {
 }
 
 void run() {
-    int64_t N;
+    i64 N;
     cin >> N;
 
-    vector<int64_t> A(N + 1);
-    for (int64_t i = 0; i < N + 1; i++) {
+    vector<i64> A(N + 1);
+    for (i64 i = 0; i < N + 1; i++) {
         cin >> A[i];
     }
 
-    int64_t answer = 0;
-    for (int64_t i = 0; i < N; i++) {
-        int64_t B;
+    i64 answer = 0;
+    for (i64 i = 0; i < N; i++) {
+        i64 B;
         cin >> B;
 
-        int64_t v1 = min(A[i], B);
+        i64 v1 = min(A[i], B);
         answer += v1;
         A[i] -= v1;
         B -= v1;
 
-        int64_t v2 = min(A[i + 1], B);
+        i64 v2 = min(A[i + 1], B);
         answer += v2;
         A[i + 1] -= v2;
     }
