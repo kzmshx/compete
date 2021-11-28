@@ -356,7 +356,7 @@ function run_cpp_command() {
   [ ! -f "$1" ] && echo "no such file" && exit 1
 
   local answer="$1"
-  local dest="${answer%.*}"
+  local dest="$(mktemp)"
 
   build_cpp "$answer" "$dest"
   trap "rm -f $dest" EXIT
