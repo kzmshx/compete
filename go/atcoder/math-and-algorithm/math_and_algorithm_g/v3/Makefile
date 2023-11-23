@@ -18,6 +18,11 @@ init: go.mod $(TESTCASE_DIR)
 test: init
 	oj t -c "go run ${MAIN}" -d ${TESTCASE_DIR} -j 10
 
+.PHONY: pretty
+pretty: test
+	godead ${MAIN}
+	go fmt
+
 .PHONY: submit
-submit: test
+submit: pretty
 	oj s ${URL} ${MAIN} -y
