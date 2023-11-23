@@ -19,7 +19,7 @@ test: init
 	oj t -c "go run ${MAIN}" -d ${TESTCASE_DIR} -j 10
 
 .PHONY: pretty
-pretty:
+pretty: test
 	godead ${MAIN}
 	go fmt
 
