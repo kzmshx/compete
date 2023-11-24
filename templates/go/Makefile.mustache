@@ -11,6 +11,11 @@ $(TESTCASE_DIR):
 	mkdir -p ../testcases
 	oj d ${URL} -d ${TESTCASE_DIR}
 
+.PHONY: go1.20.6
+go1.20.6:
+	go get golang.org/dl/go1.20.6
+	go1.20.6 download
+
 .PHONY: init
 init: go.mod $(TESTCASE_DIR)
 

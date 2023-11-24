@@ -2,7 +2,14 @@ package main
 
 import (
 	"fmt"
+
+	. "golang.org/x/exp/constraints"
 )
+
+// addable is the type of values that support addition.
+type addable interface {
+	Integer | Float | Complex | string
+}
 
 // input returns a value.
 func input[T any]() T {
@@ -20,15 +27,6 @@ func inputs[T any](n int) []T {
 	return values
 }
 
-// addable is the type of values that support addition.
-type addable interface {
-	int | int8 | int16 | int32 | int64 |
-		uint | uint8 | uint16 | uint32 | uint64 | uintptr |
-		float32 | float64 |
-		complex64 | complex128 |
-		string
-}
-
 // sum returns the sum of values.
 func sum[T addable](values []T) T {
 	var sum T
@@ -39,7 +37,7 @@ func sum[T addable](values []T) T {
 }
 
 // gcd returns the greatest common divisor of a and b.
-func gcd(a int, b int) int {
+func gcd(a, b int) int {
 	for b != 0 {
 		a, b = b, a%b
 	}
@@ -47,8 +45,40 @@ func gcd(a int, b int) int {
 }
 
 // lcm returns the least common multiple of a and b.
-func lcm(a int, b int) int {
+func lcm(a, b int) int {
 	return a * b / gcd(a, b)
+}
+
+// min returns the minimum value of a and b.
+func min[T Ordered](a, b T) T {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// max returns the maximum value of a and b.
+func max[T Ordered](a, b T) T {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+// minmax returns the minimum and maximum values of a and b.
+func minmax[T Ordered](a, b T) (T, T) {
+	if a < b {
+		return a, b
+	}
+	return b, a
+}
+
+// abs returns the absolute value of x.
+func abs[T Integer | Float](x T) T {
+	if x < T(0) {
+		return -x
+	}
+	return x
 }
 
 func main() {
