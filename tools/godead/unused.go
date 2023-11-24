@@ -27,7 +27,7 @@ func listUnusedDecls(filename string) ([]string, error) {
 	}
 
 	var sg unused.SerializedGraph
-
+	exists := false
 	for _, spec := range specs {
 		if len(spec.Errors) != 0 {
 			continue
@@ -42,7 +42,13 @@ func listUnusedDecls(filename string) ([]string, error) {
 		}
 
 		g := unused.Graph(lpkg.Fset, lpkg.Syntax, lpkg.Types, lpkg.TypesInfo, nil, nil, opts)
-		sg.Merge(g)
+		if len(g) > 0 {
+			sg.Merge(g)
+			exists = true
+		}
+	}
+	if !exists {
+		return nil, nil
 	}
 
 	var results []string
