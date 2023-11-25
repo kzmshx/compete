@@ -6,6 +6,10 @@ import (
 	. "golang.org/x/exp/constraints"
 )
 
+func main() {
+	fmt.Println("Hello, world!")
+}
+
 // addable is the type of values that support addition.
 type addable interface {
 	Integer | Float | Complex | string
@@ -87,8 +91,4 @@ func abs[T Integer | Float](x T) T {
 		return -x
 	}
 	return x
-}
-
-func main() {
-	fmt.Println("Hello, world!")
 }
