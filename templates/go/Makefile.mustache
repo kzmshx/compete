@@ -1,33 +1,41 @@
 SHELL := /bin/bash
 
-URL          := "{{{ url }}}"
-MAIN         := main.go
+GO_MAIN    := main.go
+GO_VERSION := 1.20.6
+GO		   := go$(GO_VERSION)
+
+PROBLEM_URL          := "{{{ url }}}"
 TESTCASE_DIR := ../testcases
 
-go.mod:
-	go mod init
-
 $(TESTCASE_DIR):
-	mkdir -p ../testcases
-	oj d ${URL} -d ${TESTCASE_DIR}
+	mkdir -p $(TESTCASE_DIR)
+	oj d $(PROBLEM_URL) -d $(TESTCASE_DIR)
 
-.PHONY: go1.20.6
-go1.20.6:
-	go get golang.org/dl/go1.20.6
-	go1.20.6 download
+go.mod:
+	$(GO) mod init
+
+go.sum:
+	$(GO) mod tidy
 
 .PHONY: init
-init: go.mod $(TESTCASE_DIR)
+init: $(TESTCASE_DIR) go.mod go.sum
 
 .PHONY: test
 test: init
-	oj t -c "go run ${MAIN}" -d ${TESTCASE_DIR} -j 10
+	oj t -c "$(GO) run $(GO_MAIN)" -d $(TESTCASE_DIR) -j 10
 
-.PHONY: pretty
-pretty: test
-	godead ${MAIN}
-	go fmt
+.PHONY: fmt
+fmt: test
+	godead $(GO_MAIN)
+	$(GO) mod tidy
+	$(GO) fmt
 
 .PHONY: submit
-submit: pretty
-	oj s ${URL} ${MAIN} -y
+submit: fmt
+	oj s $(PROBLEM_URL) $(GO_MAIN) -y
+
+.PHONY: commit
+commit: fmt
+	git add .
+	git commit -m "$(PROBLEM_URL)"
+	git push
