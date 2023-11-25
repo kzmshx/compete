@@ -11,20 +11,28 @@ type addable interface {
 	Integer | Float | Complex | string
 }
 
-// input returns a value.
-func input[T any]() T {
-	var value T
-	fmt.Scan(&value)
-	return value
+// read reads a value from stdin.
+func read[T any]() (r T) {
+	fmt.Scan(&r)
+	return r
 }
 
-// inputs returns n values.
-func inputs[T any](n int) []T {
-	values := make([]T, n)
+// readSlice reads n values from stdin.
+func readSlice[T any](n int) []T {
+	r := make([]T, n)
 	for i := 0; i < n; i++ {
-		values[i] = input[T]()
+		r[i] = read[T]()
 	}
-	return values
+	return r
+}
+
+// slice returns a slice of length n with each element set to v.
+func slice[T any](n int, v T) []T {
+	r := make([]T, n)
+	for i := 0; i < n; i++ {
+		r[i] = v
+	}
+	return r
 }
 
 // sum returns the sum of values.
