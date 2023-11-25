@@ -38,12 +38,18 @@ create_project_from_template() {
   cd "$target_dir" || exit 1
 
   ## Render template
-  local tmp_json
-  tmp_json=$(mktemp)
-  jq -n --arg url "$url" '$ARGS.named' >"$tmp_json"
-  mustache "$tmp_json" "Makefile.mustache" >"Makefile"
-  rm "Makefile.mustache"
-  rm "$tmp_json"
+  local makefile_template="Makefile.mustache"
+  local makefile="Makefile"
+  local view
+  view=$(mktemp)
+
+  jq -n '$ARGS.named' >"$view" \
+    --arg "url" "$url"
+
+  mustache "$view" "$makefile_template" >"$makefile"
+
+  rm "$makefile_template"
+  rm "$view"
 
   ## Initialize project
   make init

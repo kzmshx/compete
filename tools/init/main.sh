@@ -21,8 +21,6 @@ main() {
     fi
   done
 
-  echo "$url" "$language"
-
   if is_atcoder "$url"; then
     create_atcoder_project "$url" "$language"
   else
