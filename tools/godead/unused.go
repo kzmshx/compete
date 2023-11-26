@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"go/ast"
 	"go/format"
 	"go/parser"
@@ -30,15 +31,15 @@ func listUnusedDecls(filename string) ([]string, error) {
 	exists := false
 	for _, spec := range specs {
 		if len(spec.Errors) != 0 {
-			continue
+			return nil, fmt.Errorf("errors in %s: %s", spec.PkgPath, spec.Errors)
 		}
 
 		lpkg, _, err := loader.Load(spec)
 		if err != nil {
-			continue
+			return nil, err
 		}
 		if len(lpkg.Errors) != 0 {
-			continue
+			return nil, fmt.Errorf("errors in %s: %s", spec.PkgPath, lpkg.Errors)
 		}
 
 		g := unused.Graph(lpkg.Fset, lpkg.Syntax, lpkg.Types, lpkg.TypesInfo, nil, nil, opts)
@@ -47,11 +48,11 @@ func listUnusedDecls(filename string) ([]string, error) {
 			exists = true
 		}
 	}
-	if !exists {
-		return nil, nil
-	}
 
 	var results []string
+	if !exists {
+		return results, nil
+	}
 	for _, obj := range sg.Results().Unused {
 		results = append(results, obj.Name)
 	}
