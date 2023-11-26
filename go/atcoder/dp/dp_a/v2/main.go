@@ -7,6 +7,26 @@ import (
 	. "golang.org/x/exp/constraints"
 )
 
+/**
+コストを無限大で初期化しておき緩和していく方針で解く
+*/
+
+func main() {
+	n := input[int]()
+	h := inputs[int](n)
+
+	dp := slice[int](n, math.MaxInt32)
+	dp[0] = 0
+	for i := 1; i < n; i++ {
+		dp[i] = min(dp[i], dp[i-1]+abs(h[i]-h[i-1]))
+		if i > 1 {
+			dp[i] = min(dp[i], dp[i-2]+abs(h[i]-h[i-2]))
+		}
+	}
+
+	fmt.Println(dp[n-1])
+}
+
 // input returns a value.
 func input[T any]() T {
 	var value T
@@ -47,20 +67,4 @@ func abs[T Integer | Float](x T) T {
 		return -x
 	}
 	return x
-}
-
-func main() {
-	n := input[int]()
-	h := inputs[int](n)
-
-	dp := slice[int](n, math.MaxInt32)
-	dp[0] = 0
-	for i := 1; i < n; i++ {
-		dp[i] = min(dp[i], dp[i-1]+abs(h[i]-h[i-1]))
-		if i > 1 {
-			dp[i] = min(dp[i], dp[i-2]+abs(h[i]-h[i-2]))
-		}
-	}
-
-	fmt.Println(dp[n-1])
 }
