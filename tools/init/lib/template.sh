@@ -55,4 +55,7 @@ create_project_from_template() {
   make init
   echo "Initialized $target_dir"
   tree --charset unicode
+
+  ## Copy target dir to clipboard
+  echo "$target_dir" | pbcopy
 }
