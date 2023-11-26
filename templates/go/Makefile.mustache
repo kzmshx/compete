@@ -22,7 +22,7 @@ init: $(TESTCASE_DIR) go.mod go.sum
 
 .PHONY: test
 test: init
-	oj t -c "$(GO) run $(GO_MAIN)" -d $(TESTCASE_DIR) -j 10
+	oj t -c "$(GO) run $(GO_MAIN)" -d $(TESTCASE_DIR) -t 2 -j 10
 
 .PHONY: fmt
 fmt: test
