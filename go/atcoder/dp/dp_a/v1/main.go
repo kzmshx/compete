@@ -6,6 +6,23 @@ import (
 	. "golang.org/x/exp/constraints"
 )
 
+/**
+コストの最小値を0から順に求めていく方針で解く
+*/
+
+func main() {
+	n := input[int]()
+	hs := inputs[int](n)
+
+	dp := make([]int, n)
+	dp[0], dp[1] = 0, abs(hs[1]-hs[0])
+	for i := 2; i < n; i++ {
+		dp[i] = min(dp[i-1]+abs(hs[i]-hs[i-1]), dp[i-2]+abs(hs[i]-hs[i-2]))
+	}
+
+	fmt.Println(dp[n-1])
+}
+
 // input returns a value.
 func input[T any]() T {
 	var value T
@@ -36,17 +53,4 @@ func abs[T Integer | Float](x T) T {
 		return -x
 	}
 	return x
-}
-
-func main() {
-	n := input[int]()
-	hs := inputs[int](n)
-
-	dp := make([]int, n)
-	dp[0], dp[1] = 0, abs(hs[1]-hs[0])
-	for i := 2; i < n; i++ {
-		dp[i] = min(dp[i-1]+abs(hs[i]-hs[i-1]), dp[i-2]+abs(hs[i]-hs[i-2]))
-	}
-
-	fmt.Println(dp[n-1])
 }
