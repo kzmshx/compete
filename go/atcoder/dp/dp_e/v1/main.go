@@ -13,6 +13,10 @@ func main() {
 		vSum += vs[i]
 	}
 
+	// dp[i][v]: i番目までの品物を使って、価値がv以上にするための、重さの最小値
+	// 最小化問題なので、初期値は十分大きな値にしておく
+	// 1次元目のインデックスで、0番目からi番目までの品物を使うことを表現する
+	// 2次元目のインデックスで、価値が0からvSum（vの合計値）までの範囲を表現する
 	dp := sliceFunc(N+1, func(i int) []int { return sliceFill(vSum+1, math.MaxInt32) })
 	dp[0][0] = 0
 	for i := 0; i < N; i++ {
