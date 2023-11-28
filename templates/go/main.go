@@ -2,17 +2,50 @@ package main
 
 import (
 	"fmt"
-
-	. "golang.org/x/exp/constraints"
 )
 
 func main() {
 	fmt.Println("Hello, world!")
 }
 
-// addable is the type of values that support addition.
+// signed is a constraint that permits any signed integer type.
+type signed interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64
+}
+
+// unsigned is a constraint that permits any unsigned integer type.
+type unsigned interface {
+	~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr
+}
+
+// integer is a constraint that permits any integer type.
+type integer interface {
+	signed | unsigned
+}
+
+// float is a constraint that permits any floating-point type.
+type float interface {
+	~float32 | ~float64
+}
+
+// actual is a constraint that permits any complex numeric type.
+type actual interface {
+	integer | float
+}
+
+// imaginary is a constraint that permits any complex numeric type.
+type imaginary interface {
+	~complex64 | ~complex128
+}
+
+// ordered is a constraint that permits any ordered type: any type
+type ordered interface {
+	integer | float | ~string
+}
+
+// addable is a constraint that permits any ordered type: any type
 type addable interface {
-	Integer | Float | Complex | string
+	integer | float | imaginary | ~string
 }
 
 // read reads a value from stdin.
@@ -30,8 +63,48 @@ func readSlice[T any](n int) []T {
 	return r
 }
 
-// slice returns a slice of length n with each element set to v.
-func slice[T any](n int, v T) []T {
+// chmax sets the maximum value of a and b to a and returns the maximum value.
+func chmax[T ordered](a *T, b T) T {
+	if *a < b {
+		*a = b
+	}
+	return *a
+}
+
+// chmin sets the minimum value of a and b to a and returns the minimum value.
+func chmin[T ordered](a *T, b T) T {
+	if *a > b {
+		*a = b
+	}
+	return *a
+}
+
+// max returns the maximum value of a and b.
+func max[T ordered](a, b T) T {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+// min returns the minimum value of a and b.
+func min[T ordered](a, b T) T {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// abs returns the absolute value of x.
+func abs[T actual](x T) T {
+	if x < T(0) {
+		return -x
+	}
+	return x
+}
+
+// sliceFill returns a slice of length n with each element set to v.
+func sliceFill[T any](n int, v T) []T {
 	r := make([]T, n)
 	for i := 0; i < n; i++ {
 		r[i] = v
@@ -39,13 +112,29 @@ func slice[T any](n int, v T) []T {
 	return r
 }
 
-// sum returns the sum of values.
-func sum[T addable](values []T) T {
-	var sum T
-	for _, value := range values {
-		sum += value
+// sliceFunc returns a slice of length n with each element set to the result of f(i).
+func sliceFunc[T any](n int, f func(int) T) []T {
+	r := make([]T, n)
+	for i := 0; i < n; i++ {
+		r[i] = f(i)
 	}
-	return sum
+	return r
+}
+
+// sliceMax returns the maximum value of s.
+func sliceMax[T ordered](s []T) (r T) {
+	for _, v := range s {
+		chmax(&r, v)
+	}
+	return r
+}
+
+// sliceSum returns the sliceSum of values.
+func sliceSum[T addable](s []T) (r T) {
+	for _, v := range s {
+		r += v
+	}
+	return r
 }
 
 // gcd returns the greatest common divisor of a and b.
@@ -59,36 +148,4 @@ func gcd(a, b int) int {
 // lcm returns the least common multiple of a and b.
 func lcm(a, b int) int {
 	return a * b / gcd(a, b)
-}
-
-// min returns the minimum value of a and b.
-func min[T Ordered](a, b T) T {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-// max returns the maximum value of a and b.
-func max[T Ordered](a, b T) T {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-// minmax returns the minimum and maximum values of a and b.
-func minmax[T Ordered](a, b T) (T, T) {
-	if a < b {
-		return a, b
-	}
-	return b, a
-}
-
-// abs returns the absolute value of x.
-func abs[T Integer | Float](x T) T {
-	if x < T(0) {
-		return -x
-	}
-	return x
 }
