@@ -14,8 +14,8 @@ func main() {
 	defer w.Flush()
 
 	N, K, L := r.Int(), r.Int(), r.Int()
-	roadGroup := newUnionFind(N)
-	railGroup := newUnionFind(N)
+	roadGroup := NewUnionFind(N)
+	railGroup := NewUnionFind(N)
 	for i := 0; i < K; i++ {
 		p, q := r.Int()-1, r.Int()-1
 		roadGroup.Union(p, q)
@@ -60,17 +60,23 @@ func (s *Scanner) String() string {
 }
 
 func (s *Scanner) Int() int {
-	n, _ := strconv.Atoi(s.String())
+	n, err := strconv.Atoi(s.String())
+	if err != nil {
+		panic(err)
+	}
 	return n
 }
 
 func (s *Scanner) Float64() float64 {
-	n, _ := strconv.ParseFloat(s.String(), 64)
+	n, err := strconv.ParseFloat(s.String(), 64)
+	if err != nil {
+		panic(err)
+	}
 	return n
 }
 
 type Writer struct {
-	buf *bufio.Writer
+	bf *bufio.Writer
 }
 
 func NewWriter(w io.Writer) *Writer {
@@ -78,26 +84,26 @@ func NewWriter(w io.Writer) *Writer {
 }
 
 func (w *Writer) Print(a ...interface{}) {
-	fmt.Fprint(w.buf, a...)
+	fmt.Fprint(w.bf, a...)
 }
 
 func (w *Writer) Println(a ...interface{}) {
-	fmt.Fprintln(w.buf, a...)
+	fmt.Fprintln(w.bf, a...)
 }
 
 func (w *Writer) Flush() {
-	w.buf.Flush()
+	w.bf.Flush()
 }
 
-// unionFind is a disjoint-set data structure.
-type unionFind struct {
+// UnionFind is a disjoint-set data structure.
+type UnionFind struct {
 	parent []int // parent[i] = parent of i
 	size   []int // size[i] = number of elements in subtree rooted at i
 }
 
-// newUnionFind creates a new union-find data structure with n elements.
-func newUnionFind(n int) *unionFind {
-	u := &unionFind{
+// NewUnionFind creates a new union-find data structure with n elements.
+func NewUnionFind(n int) *UnionFind {
+	u := &UnionFind{
 		parent: make([]int, n),
 		size:   make([]int, n),
 	}
@@ -109,7 +115,7 @@ func newUnionFind(n int) *unionFind {
 }
 
 // Root returns the root of the component that element x belongs to.
-func (u *unionFind) Root(x int) int {
+func (u *UnionFind) Root(x int) int {
 	// x is the root of the tree
 	if u.parent[x] == -1 {
 		return x
@@ -121,12 +127,12 @@ func (u *unionFind) Root(x int) int {
 }
 
 // IsSameSet returns true if elements x and y belong to the same component.
-func (u *unionFind) IsSameSet(x, y int) bool {
+func (u *UnionFind) IsSameSet(x, y int) bool {
 	return u.Root(x) == u.Root(y)
 }
 
 // Union merges the components that elements x and y belong to.
-func (u *unionFind) Union(x, y int) bool {
+func (u *UnionFind) Union(x, y int) bool {
 	xRoot, yRoot := u.Root(x), u.Root(y)
 	if xRoot == yRoot {
 		return false
@@ -143,6 +149,6 @@ func (u *unionFind) Union(x, y int) bool {
 }
 
 // Size returns the size of the component that element x belongs to.
-func (u *unionFind) Size(x int) int {
+func (u *UnionFind) Size(x int) int {
 	return u.size[u.Root(x)]
 }
