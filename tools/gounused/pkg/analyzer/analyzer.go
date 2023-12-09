@@ -6,6 +6,11 @@ import (
 	"go/token"
 )
 
+/**
+TODO: Consider what should be treated as unused and what should not.
+TODO: Look and get familiar with the structure of Go AST.
+*/
+
 type FunctionInfo struct {
 	Name string
 	Decl *ast.FuncDecl
@@ -26,6 +31,8 @@ func FindUnusedFunctions(code string) ([]*FunctionInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	ast.Print(fset, file)
 
 	var unusedFunctions []*FunctionInfo
 

@@ -13,8 +13,8 @@ func TestFindUnusedFunctions(t *testing.T) {
 		filePath      string
 		expectedNames []string
 	}{
-		{name: "Public functions", filePath: "testdata/public_function.go", expectedNames: []string{"UnusedPublicFunction"}},
-		{name: "Private functions", filePath: "testdata/private_function.go", expectedNames: []string{"unusedPrivateFunction"}},
+		{name: "Public functions", filePath: "testdata/main.go", expectedNames: []string{"UnusedPublicFunction"}},
+		{name: "Private functions", filePath: "testdata/main.go", expectedNames: []string{"unusedPrivateFunction"}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			code, err := os.ReadFile(tc.filePath)
