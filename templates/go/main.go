@@ -62,9 +62,7 @@ type addable interface {
 
 const MaxBufferSize = 1 * 1024 * 1024
 
-type Scanner struct {
-	sc *bufio.Scanner
-}
+type Scanner struct{ sc *bufio.Scanner }
 
 func NewScanner(r io.Reader, size int) *Scanner {
 	sc := bufio.NewScanner(r)
@@ -73,46 +71,38 @@ func NewScanner(r io.Reader, size int) *Scanner {
 	return &Scanner{sc}
 }
 
-func (s *Scanner) String() string {
-	s.sc.Scan()
-	return s.sc.Text()
-}
+func (s *Scanner) String() string   { s.sc.Scan(); return s.sc.Text() }
+func (s *Scanner) Int() int         { return atoi(s.String()) }
+func (s *Scanner) Float64() float64 { return atof(s.String()) }
 
-func (s *Scanner) Int() int {
-	n, err := strconv.Atoi(s.String())
+type Writer struct{ bf *bufio.Writer }
+
+func NewWriter(w io.Writer) *Writer { return &Writer{bufio.NewWriter(w)} }
+
+func (w *Writer) Print(a ...interface{})   { fmt.Fprint(w.bf, a...) }
+func (w *Writer) Println(a ...interface{}) { fmt.Fprintln(w.bf, a...) }
+func (w *Writer) Flush()                   { w.bf.Flush() }
+
+// atoi converts string to int.
+func atoi(s string) int {
+	n, err := strconv.Atoi(s)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (s *Scanner) Float64() float64 {
-	n, err := strconv.ParseFloat(s.String(), 64)
+// atof converts string to float64.
+func atof(s string) float64 {
+	n, err := strconv.ParseFloat(s, 64)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-type Writer struct {
-	bf *bufio.Writer
-}
-
-func NewWriter(w io.Writer) *Writer {
-	return &Writer{bufio.NewWriter(w)}
-}
-
-func (w *Writer) Print(a ...interface{}) {
-	fmt.Fprint(w.bf, a...)
-}
-
-func (w *Writer) Println(a ...interface{}) {
-	fmt.Fprintln(w.bf, a...)
-}
-
-func (w *Writer) Flush() {
-	w.bf.Flush()
-}
+// itoa converts int to string.
+func itoa(i int) string { return strconv.Itoa(i) }
 
 // chmax sets the maximum value of a and b to a and returns the maximum value.
 func chmax[T ordered](a *T, b T) T {
