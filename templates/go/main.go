@@ -70,15 +70,15 @@ func NewScanner(r io.Reader, size int) *Scanner {
 	sc.Split(bufio.ScanWords)
 	return &Scanner{sc}
 }
-
-func (s *Scanner) String() string   { s.sc.Scan(); return s.sc.Text() }
+func (s *Scanner) scan() bool       { return s.sc.Scan() }
+func (s *Scanner) text() string     { return s.sc.Text() }
+func (s *Scanner) String() string   { s.scan(); return s.text() }
 func (s *Scanner) Int() int         { return atoi(s.String()) }
 func (s *Scanner) Float64() float64 { return atof(s.String()) }
 
 type Writer struct{ bf *bufio.Writer }
 
-func NewWriter(w io.Writer) *Writer { return &Writer{bufio.NewWriter(w)} }
-
+func NewWriter(w io.Writer) *Writer        { return &Writer{bufio.NewWriter(w)} }
 func (w *Writer) Print(a ...interface{})   { fmt.Fprint(w.bf, a...) }
 func (w *Writer) Println(a ...interface{}) { fmt.Fprintln(w.bf, a...) }
 func (w *Writer) Flush()                   { w.bf.Flush() }
