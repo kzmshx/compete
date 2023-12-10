@@ -8,12 +8,16 @@ import (
 	"strconv"
 )
 
+func Solve(r *Scanner, w *Writer) {
+	w.Println(r.Int())
+}
+
 func main() {
 	r := NewScanner(os.Stdin, MaxBufferSize)
 	w := NewWriter(os.Stdout)
 	defer w.Flush()
 
-	w.Println(r.Int())
+	Solve(r, w)
 }
 
 // signed is a constraint that permits any signed integer type.
