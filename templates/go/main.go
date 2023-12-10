@@ -175,8 +175,9 @@ func sliceFunc[T any](n int, f func(int) T) []T {
 // sliceReverse reverses the order of elements in s.
 func sliceReverse[T any](s []T) []T {
 	r := make([]T, len(s))
+	copy(r, s[:])
 	for i, j := 0, len(r)-1; i < j; i, j = i+1, j-1 {
-		r[i], r[j] = s[j], s[i]
+		r[i], r[j] = r[j], r[i]
 	}
 	return r
 }
