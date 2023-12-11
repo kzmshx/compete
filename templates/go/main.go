@@ -13,10 +13,8 @@ func Solve(r *Scanner, w *Writer) {
 }
 
 func main() {
-	r := NewScanner(os.Stdin, MaxBufferSize)
-	w := NewWriter(os.Stdout)
+	r, w := NewScanner(os.Stdin, MaxBufferSize), NewWriter(os.Stdout)
 	defer w.Flush()
-
 	Solve(r, w)
 }
 
@@ -83,26 +81,16 @@ func (w *Writer) Print(a ...interface{})   { fmt.Fprint(w.bf, a...) }
 func (w *Writer) Println(a ...interface{}) { fmt.Fprintln(w.bf, a...) }
 func (w *Writer) Flush()                   { w.bf.Flush() }
 
-// atoi converts string to int.
-func atoi(s string) int {
-	n, err := strconv.Atoi(s)
+func unwrap[T any](v T, err error) T {
 	if err != nil {
 		panic(err)
 	}
-	return n
+	return v
 }
 
-// atof converts string to float64.
-func atof(s string) float64 {
-	n, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-// itoa converts int to string.
-func itoa(i int) string { return strconv.Itoa(i) }
+func atoi(s string) int     { return unwrap(strconv.Atoi(s)) }
+func atof(s string) float64 { return unwrap(strconv.ParseFloat(s, 64)) }
+func itoa(i int) string     { return strconv.Itoa(i) }
 
 // chmax sets the maximum value of a and b to a and returns the maximum value.
 func chmax[T ordered](a *T, b T) T {
