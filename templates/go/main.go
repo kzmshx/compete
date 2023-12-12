@@ -58,6 +58,23 @@ type addable interface {
 	integer | float | imaginary | ~string
 }
 
+// unwrap returns the value of v if err is nil and panics otherwise.
+func unwrap[T any](v T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// atoi returns an integer converted from s.
+func atoi(s string) int { return unwrap(strconv.Atoi(s)) }
+
+// atof returns a float converted from s.
+func atof(s string) float64 { return unwrap(strconv.ParseFloat(s, 64)) }
+
+// itoa returns a string converted from i.
+func itoa(i int) string { return strconv.Itoa(i) }
+
 const MaxBufferSize = 1 * 1024 * 1024
 
 type Scanner struct{ sc *bufio.Scanner }
@@ -80,23 +97,6 @@ func NewWriter(w io.Writer) *Writer        { return &Writer{bufio.NewWriter(w)} 
 func (w *Writer) Print(a ...interface{})   { fmt.Fprint(w.bf, a...) }
 func (w *Writer) Println(a ...interface{}) { fmt.Fprintln(w.bf, a...) }
 func (w *Writer) Flush()                   { w.bf.Flush() }
-
-// unwrap returns the value of v if err is nil and panics otherwise.
-func unwrap[T any](v T, err error) T {
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// atoi returns an integer converted from s.
-func atoi(s string) int { return unwrap(strconv.Atoi(s)) }
-
-// atof returns a float converted from s.
-func atof(s string) float64 { return unwrap(strconv.ParseFloat(s, 64)) }
-
-// itoa returns a string converted from i.
-func itoa(i int) string { return strconv.Itoa(i) }
 
 // chmax sets the maximum value of a and b to a and returns the maximum value.
 func chmax[T ordered](a *T, b T) T {
