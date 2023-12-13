@@ -8,12 +8,12 @@ import (
 	"strconv"
 )
 
-func Solve(r *Scanner, w *Writer) {
+func Solve(r *scanner, w *writer) {
 	w.Println(r.Int())
 }
 
 func main() {
-	r, w := NewScanner(os.Stdin, MaxBufferSize), NewWriter(os.Stdout)
+	r, w := newScanner(os.Stdin, maxBufferSize), newWriter(os.Stdout)
 	defer w.Flush()
 	Solve(r, w)
 }
@@ -58,45 +58,38 @@ type addable interface {
 	integer | float | imaginary | ~string
 }
 
-// unwrap returns the value of v if err is nil and panics otherwise.
-func unwrap[T any](v T, err error) T {
+// unwrap returns v if err is nil, otherwise panics with err.
+func unwrap[T any](value T, err error) T {
 	if err != nil {
 		panic(err)
 	}
-	return v
+	return value
 }
 
-// atoi returns an integer converted from s.
+// atoi converts string s to int.
 func atoi(s string) int { return unwrap(strconv.Atoi(s)) }
 
-// atof returns a float converted from s.
+// atof converts string s to float64.
 func atof(s string) float64 { return unwrap(strconv.ParseFloat(s, 64)) }
 
-// itoa returns a string converted from i.
+// itoa converts int i to string.
 func itoa(i int) string { return strconv.Itoa(i) }
 
-const MaxBufferSize = 1 * 1024 * 1024
-
-type Scanner struct{ sc *bufio.Scanner }
-
-func NewScanner(r io.Reader, size int) *Scanner {
-	sc := bufio.NewScanner(r)
-	sc.Buffer(make([]byte, size), size)
-	sc.Split(bufio.ScanWords)
-	return &Scanner{sc}
+// max returns the maximum of a and b.
+func max[T ordered](a, b T) T {
+	if a > b {
+		return a
+	}
+	return b
 }
-func (s *Scanner) scan() bool       { return s.sc.Scan() }
-func (s *Scanner) text() string     { return s.sc.Text() }
-func (s *Scanner) String() string   { s.scan(); return s.text() }
-func (s *Scanner) Int() int         { return atoi(s.String()) }
-func (s *Scanner) Float64() float64 { return atof(s.String()) }
 
-type Writer struct{ bf *bufio.Writer }
-
-func NewWriter(w io.Writer) *Writer        { return &Writer{bufio.NewWriter(w)} }
-func (w *Writer) Print(a ...interface{})   { fmt.Fprint(w.bf, a...) }
-func (w *Writer) Println(a ...interface{}) { fmt.Fprintln(w.bf, a...) }
-func (w *Writer) Flush()                   { w.bf.Flush() }
+// min returns the minimum of a and b.
+func min[T ordered](a, b T) T {
+	if a < b {
+		return a
+	}
+	return b
+}
 
 // chmax sets the maximum value of a and b to a and returns the maximum value.
 func chmax[T ordered](a *T, b T) T {
@@ -114,72 +107,12 @@ func chmin[T ordered](a *T, b T) T {
 	return *a
 }
 
-// max returns the maximum value of a and b.
-func max[T ordered](a, b T) T {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-// min returns the minimum value of a and b.
-func min[T ordered](a, b T) T {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 // abs returns the absolute value of x.
 func abs[T actual](x T) T {
 	if x < T(0) {
 		return -x
 	}
 	return x
-}
-
-// sliceFill returns a slice of length n with each element set to v.
-func sliceFill[T any](n int, v T) []T {
-	r := make([]T, n)
-	for i := 0; i < n; i++ {
-		r[i] = v
-	}
-	return r
-}
-
-// sliceFunc returns a slice of length n with each element set to the result of f(i).
-func sliceFunc[T any](n int, f func(int) T) []T {
-	r := make([]T, n)
-	for i := 0; i < n; i++ {
-		r[i] = f(i)
-	}
-	return r
-}
-
-// sliceReverse reverses the order of elements in s.
-func sliceReverse[T any](s []T) []T {
-	r := make([]T, len(s))
-	copy(r, s[:])
-	for i, j := 0, len(r)-1; i < j; i, j = i+1, j-1 {
-		r[i], r[j] = r[j], r[i]
-	}
-	return r
-}
-
-// sliceMax returns the maximum value of s.
-func sliceMax[T ordered](s []T) (r T) {
-	for _, v := range s {
-		chmax(&r, v)
-	}
-	return r
-}
-
-// sliceSum returns the sum of s.
-func sliceSum[T addable](s []T) (r T) {
-	for _, v := range s {
-		r += v
-	}
-	return r
 }
 
 // gcd returns the greatest common divisor of a and b.
@@ -195,15 +128,38 @@ func lcm(a, b int) int {
 	return a * b / gcd(a, b)
 }
 
-// UnionFind is a disjoint-set data structure.
-type UnionFind struct {
+const maxBufferSize = 1 * 1024 * 1024
+
+type scanner struct{ sc *bufio.Scanner }
+
+func newScanner(r io.Reader, size int) *scanner {
+	sc := bufio.NewScanner(r)
+	sc.Buffer(make([]byte, size), size)
+	sc.Split(bufio.ScanWords)
+	return &scanner{sc}
+}
+func (s *scanner) scan() bool       { return s.sc.Scan() }
+func (s *scanner) text() string     { return s.sc.Text() }
+func (s *scanner) String() string   { s.scan(); return s.text() }
+func (s *scanner) Int() int         { return atoi(s.String()) }
+func (s *scanner) Float64() float64 { return atof(s.String()) }
+
+type writer struct{ bf *bufio.Writer }
+
+func newWriter(w io.Writer) *writer        { return &writer{bufio.NewWriter(w)} }
+func (w *writer) Print(a ...interface{})   { fmt.Fprint(w.bf, a...) }
+func (w *writer) Println(a ...interface{}) { fmt.Fprintln(w.bf, a...) }
+func (w *writer) Flush()                   { w.bf.Flush() }
+
+// unionFind is a disjoint-set data structure.
+type unionFind struct {
 	parent []int // parent[i] = parent of i
 	size   []int // size[i] = number of elements in subtree rooted at i
 }
 
-// NewUnionFind creates a new union-find data structure with n elements.
-func NewUnionFind(n int) *UnionFind {
-	u := &UnionFind{
+// newUnionFind creates a new union-find data structure with n elements.
+func newUnionFind(n int) *unionFind {
+	u := &unionFind{
 		parent: make([]int, n),
 		size:   make([]int, n),
 	}
@@ -214,26 +170,9 @@ func NewUnionFind(n int) *UnionFind {
 	return u
 }
 
-// Root returns the root of the component that element x belongs to.
-func (u *UnionFind) Root(x int) int {
-	// x is the root of the tree
-	if u.parent[x] == -1 {
-		return x
-	}
-
-	// Use path compression heuristic.
-	u.parent[x] = u.Root(u.parent[x])
-	return u.parent[x]
-}
-
-// IsSameSet returns true if elements x and y belong to the same component.
-func (u *UnionFind) IsSameSet(x, y int) bool {
-	return u.Root(x) == u.Root(y)
-}
-
 // Union merges the components that elements x and y belong to.
-func (u *UnionFind) Union(x, y int) bool {
-	xRoot, yRoot := u.Root(x), u.Root(y)
+func (u *unionFind) Union(x, y int) bool {
+	xRoot, yRoot := u.Find(x), u.Find(y)
 	if xRoot == yRoot {
 		return false
 	}
@@ -248,7 +187,24 @@ func (u *UnionFind) Union(x, y int) bool {
 	return true
 }
 
+// Find returns the root of the component that element x belongs to.
+func (u *unionFind) Find(x int) int {
+	// x is the root of the tree
+	if u.parent[x] == -1 {
+		return x
+	}
+
+	// Use path compression heuristic.
+	u.parent[x] = u.Find(u.parent[x])
+	return u.parent[x]
+}
+
+// IsSame returns true if elements x and y belong to the same component.
+func (u *unionFind) IsSame(x, y int) bool {
+	return u.Find(x) == u.Find(y)
+}
+
 // Size returns the size of the component that element x belongs to.
-func (u *UnionFind) Size(x int) int {
-	return u.size[u.Root(x)]
+func (u *unionFind) Size(x int) int {
+	return u.size[u.Find(x)]
 }
