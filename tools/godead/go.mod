@@ -1,4 +1,4 @@
-module github.com/kzmshx/compete/tools/godead2
+module github.com/kzmshx/compete/tools/godead
 
 go 1.21.5
 
