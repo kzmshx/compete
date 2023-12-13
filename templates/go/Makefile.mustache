@@ -8,9 +8,12 @@ TESTCASE_DIR := ../testcases
 $(TESTCASE_DIR):
 	mkdir -p $@ && oj d $(PROBLEM_URL) -d $@
 
+go.mod:
+	$(GO) mod init $(PROBLEM_URL)
+
 .PHONY: init test fmt submit commit
 
-init: $(TESTCASE_DIR)
+init: $(TESTCASE_DIR) go.mod
 
 test: init
 	oj t -c "$(GO) run $(MAIN_FILE)" -d $(TESTCASE_DIR) -t 2 -j 10
