@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"crypto/rand"
 	"fmt"
 	"io"
 	"os"
@@ -19,39 +20,27 @@ func main() {
 }
 
 // signed is a constraint that permits any signed integer type.
-type signed interface {
-	~int | ~int8 | ~int16 | ~int32 | ~int64
-}
+// int8, int16 are not included because they are rarely used.
+type signed interface{ ~int | ~int32 | ~int64 }
 
 // unsigned is a constraint that permits any unsigned integer type.
-type unsigned interface {
-	~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr
-}
+// uint8, uint16, uintptr are not included because they are rarely used.
+type unsigned interface{ ~uint | ~uint32 | ~uint64 }
 
 // integer is a constraint that permits any integer type.
-type integer interface {
-	signed | unsigned
-}
+type integer interface{ signed | unsigned }
 
 // float is a constraint that permits any floating-point type.
-type float interface {
-	~float32 | ~float64
-}
+type float interface{ ~float32 | ~float64 }
 
 // actual is a constraint that permits any complex numeric type.
-type actual interface {
-	integer | float
-}
+type actual interface{ integer | float }
 
 // imaginary is a constraint that permits any complex numeric type.
-type imaginary interface {
-	~complex64 | ~complex128
-}
+type imaginary interface{ ~complex64 | ~complex128 }
 
 // ordered is a constraint that permits any ordered type: any type
-type ordered interface {
-	integer | float | ~string
-}
+type ordered interface{ integer | float | ~string }
 
 // addable is a constraint that permits any ordered type: any type
 type addable interface {
@@ -126,6 +115,53 @@ func gcd(a, b int) int {
 // lcm returns the least common multiple of a and b.
 func lcm(a, b int) int { return a * b / gcd(a, b) }
 
+// randomString generates a random string of length n.
+func randomString(length int) string {
+	b := make([]byte, length)
+	if _, err := rand.Read(b); err != nil {
+		panic(err)
+	}
+	return fmt.Sprintf("%x", b)
+}
+
+// renderGraph renders a graph in Mermaid format.
+func renderGraph(graph [][]int, root int) {
+	filename := fmt.Sprintf("graph-%s.md", randomString(8))
+	f, err := os.Create(filename)
+	if err != nil {
+		panic(err)
+	}
+
+	w := NewWriter(f)
+	defer w.Flush()
+
+	w.Println("```mermaid")
+	w.Println("graph TD;")
+
+	visited := make([]bool, len(graph))
+
+	q := []int{root}
+	visited[root] = true
+	w.Printf("  %d((%d))\n", root, root)
+
+	for len(q) > 0 {
+		v := q[0]
+		q = q[1:]
+		for _, n := range graph[v] {
+			if visited[n] {
+				continue
+			}
+
+			q = append(q, n)
+			visited[n] = true
+			w.Printf("  %d((%d))\n", n, n)
+			w.Printf("  %d --- %d\n", v, n)
+		}
+	}
+
+	w.Println("```")
+}
+
 const maxBufferSize = 1 * 1024 * 1024
 
 type Scanner struct{ sc *bufio.Scanner }
@@ -152,6 +188,8 @@ type Writer struct{ bf *bufio.Writer }
 func NewWriter(w io.Writer) *Writer { return &Writer{bufio.NewWriter(w)} }
 
 func (w *Writer) Print(a ...interface{}) { fmt.Fprint(w.bf, a...) }
+
+func (w *Writer) Printf(format string, a ...interface{}) { fmt.Fprintf(w.bf, format, a...) }
 
 func (w *Writer) Println(a ...interface{}) { fmt.Fprintln(w.bf, a...) }
 
