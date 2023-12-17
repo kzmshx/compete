@@ -47,76 +47,76 @@ type addable interface {
 	integer | float | imaginary | ~string
 }
 
-// unwrap returns v if err is nil, otherwise panics with err.
-func unwrap[T any](value T, err error) T {
+// Unwrap returns v if err is nil, otherwise panics with err.
+func Unwrap[T any](value T, err error) T {
 	if err != nil {
 		panic(err)
 	}
 	return value
 }
 
-// atoi converts string s to int.
-func atoi(s string) int { return unwrap(strconv.Atoi(s)) }
+// Atoi converts string s to int.
+func Atoi(s string) int { return Unwrap(strconv.Atoi(s)) }
 
-// atof converts string s to float64.
-func atof(s string) float64 { return unwrap(strconv.ParseFloat(s, 64)) }
+// Atof converts string s to float64.
+func Atof(s string) float64 { return Unwrap(strconv.ParseFloat(s, 64)) }
 
-// itoa converts int i to string.
-func itoa(i int) string { return strconv.Itoa(i) }
+// Itoa converts int i to string.
+func Itoa(i int) string { return strconv.Itoa(i) }
 
-// max returns the maximum of a and b.
-func max[T ordered](a, b T) T {
+// Max returns the maximum of a and b.
+func Max[T ordered](a, b T) T {
 	if a > b {
 		return a
 	}
 	return b
 }
 
-// min returns the minimum of a and b.
-func min[T ordered](a, b T) T {
+// Min returns the minimum of a and b.
+func Min[T ordered](a, b T) T {
 	if a < b {
 		return a
 	}
 	return b
 }
 
-// chmax sets the maximum value of a and b to a and returns the maximum value.
-func chmax[T ordered](a *T, b T) T {
+// ChooseMax sets the maximum value of a and b to a and returns the maximum value.
+func ChooseMax[T ordered](a *T, b T) T {
 	if *a < b {
 		*a = b
 	}
 	return *a
 }
 
-// chmin sets the minimum value of a and b to a and returns the minimum value.
-func chmin[T ordered](a *T, b T) T {
+// ChooseMin sets the minimum value of a and b to a and returns the minimum value.
+func ChooseMin[T ordered](a *T, b T) T {
 	if *a > b {
 		*a = b
 	}
 	return *a
 }
 
-// abs returns the absolute value of x.
-func abs[T actual](x T) T {
+// Abs returns the absolute value of x.
+func Abs[T actual](x T) T {
 	if x < T(0) {
 		return -x
 	}
 	return x
 }
 
-// gcd returns the greatest common divisor of a and b.
-func gcd(a, b int) int {
+// GCD returns the greatest common divisor of a and b.
+func GCD(a, b int) int {
 	for b != 0 {
 		a, b = b, a%b
 	}
 	return a
 }
 
-// lcm returns the least common multiple of a and b.
-func lcm(a, b int) int { return a * b / gcd(a, b) }
+// LCM returns the least common multiple of a and b.
+func LCM(a, b int) int { return a * b / GCD(a, b) }
 
-// randomString generates a random string of length n.
-func randomString(length int) string {
+// RandomString generates a random string of length n.
+func RandomString(length int) string {
 	b := make([]byte, length)
 	if _, err := rand.Read(b); err != nil {
 		panic(err)
@@ -124,9 +124,9 @@ func randomString(length int) string {
 	return fmt.Sprintf("%x", b)
 }
 
-// renderGraph renders a graph in Mermaid format.
-func renderGraph(graph [][]int, root int) {
-	filename := fmt.Sprintf("graph-%s.md", randomString(8))
+// RenderGraph renders a graph in Mermaid format.
+func RenderGraph(graph [][]int, root int) {
+	filename := fmt.Sprintf("graph-%s.md", RandomString(8))
 	f, err := os.Create(filename)
 	if err != nil {
 		panic(err)
@@ -179,9 +179,9 @@ func (s *Scanner) text() string { return s.sc.Text() }
 
 func (s *Scanner) String() string { s.scan(); return s.text() }
 
-func (s *Scanner) Int() int { return atoi(s.String()) }
+func (s *Scanner) Int() int { return Atoi(s.String()) }
 
-func (s *Scanner) Float64() float64 { return atof(s.String()) }
+func (s *Scanner) Float64() float64 { return Atof(s.String()) }
 
 type Writer struct{ bf *bufio.Writer }
 
