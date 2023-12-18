@@ -73,6 +73,15 @@ func Oct[T integer](n T) string { return strconv.FormatInt(int64(n), 8) }
 // Hex returns the hexadecimal representation of n.
 func Hex[T integer](n T) string { return strconv.FormatInt(int64(n), 16) }
 
+// Digits returns the digits of n with base
+func Digits[T integer](n T, base T) (r []T) {
+	for n > 0 {
+		r = append(r, n%base)
+		n /= base
+	}
+	return r
+}
+
 // Max returns the maximum of a and b.
 func Max[T ordered](a, b T) T {
 	if a > b {
