@@ -104,6 +104,19 @@ func Abs[T actual](x T) T {
 	return x
 }
 
+// Pow returns x**n, the base-x exponential of n.
+func Pow[T actual](x T, n int) T {
+	y := T(1)
+	for n > 0 {
+		if n&1 == 1 {
+			y *= x
+		}
+		x *= x
+		n >>= 1
+	}
+	return y
+}
+
 // GCD returns the greatest common divisor of a and b.
 func GCD(a, b int) int {
 	for b != 0 {
