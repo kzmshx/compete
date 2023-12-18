@@ -25,4 +25,4 @@ submit: fmt
 	oj s $(PROBLEM_URL) $(MAIN_FILE) -y
 
 commit: fmt
-	git add . && git commit -m "$(PROBLEM_URL)" && git push
+	git add . && git add ../testcases && git commit -m "$(PROBLEM_URL)" && git push
