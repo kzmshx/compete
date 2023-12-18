@@ -64,6 +64,15 @@ func Atof(s string) float64 { return Unwrap(strconv.ParseFloat(s, 64)) }
 // Itoa converts int i to string.
 func Itoa(i int) string { return strconv.Itoa(i) }
 
+// Bin returns the binary representation of n.
+func Bin[T integer](n T) string { return strconv.FormatInt(int64(n), 2) }
+
+// Oct returns the octal representation of n.
+func Oct[T integer](n T) string { return strconv.FormatInt(int64(n), 8) }
+
+// Hex returns the hexadecimal representation of n.
+func Hex[T integer](n T) string { return strconv.FormatInt(int64(n), 16) }
+
 // Max returns the maximum of a and b.
 func Max[T ordered](a, b T) T {
 	if a > b {
