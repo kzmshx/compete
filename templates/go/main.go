@@ -115,6 +115,26 @@ func GCD(a, b int) int {
 // LCM returns the least common multiple of a and b.
 func LCM(a, b int) int { return a * b / GCD(a, b) }
 
+// All checks if all elements in s satisfy f.
+func All[T any](s []T, f func(T) bool) bool {
+	for _, v := range s {
+		if !f(v) {
+			return false
+		}
+	}
+	return true
+}
+
+// Any checks if any element in s satisfies f.
+func Any[T any](s []T, f func(T) bool) bool {
+	for _, v := range s {
+		if f(v) {
+			return true
+		}
+	}
+	return false
+}
+
 // RandomString generates a random string of length n.
 func RandomString(length int) string {
 	b := make([]byte, length)
