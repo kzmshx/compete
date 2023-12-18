@@ -135,6 +135,11 @@ func Any[T any](s []T, f func(T) bool) bool {
 	return false
 }
 
+// Contains checks if s contains e.
+func Contains[T comparable](s []T, e T) bool {
+	return Any(s, func(x T) bool { return x == e })
+}
+
 // RandomString generates a random string of length n.
 func RandomString(length int) string {
 	b := make([]byte, length)
