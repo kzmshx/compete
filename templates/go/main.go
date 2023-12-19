@@ -73,6 +73,9 @@ func Oct[T integer](n T) string { return strconv.FormatInt(int64(n), 8) }
 // Hex returns the hexadecimal representation of n.
 func Hex[T integer](n T) string { return strconv.FormatInt(int64(n), 16) }
 
+// ParseInt converts s to int in base b.
+func ParseInt(s string, b int) int { return int(Unwrap(strconv.ParseInt(s, b, 64))) }
+
 // Digits returns the digits of n with base
 func Digits[T integer](n T, base T) (r []T) {
 	for n > 0 {
