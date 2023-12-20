@@ -174,6 +174,36 @@ func Contains[T comparable](s []T, e T) bool {
 	return Any(s, func(x T) bool { return x == e })
 }
 
+// LowerBound returns the first index i in [0, n) such that a[i] >= x.
+// If there is no such index, it returns n.
+func LowerBound[T ordered](s []T, x T) int {
+	l, r := 0, len(s)
+	for l < r {
+		m := int(uint(l+r) >> 1)
+		if s[m] < x {
+			l = m + 1
+		} else {
+			r = m
+		}
+	}
+	return l
+}
+
+// UpperBound returns the first index i in [0, n) such that a[i] > x.
+// If there is no such index, it returns n.
+func UpperBound[T ordered](s []T, x T) int {
+	l, r := 0, len(s)
+	for l < r {
+		m := int(uint(l+r) >> 1)
+		if s[m] <= x {
+			l = m + 1
+		} else {
+			r = m
+		}
+	}
+	return l
+}
+
 // RandomString generates a random string of length n.
 func RandomString(length int) string {
 	b := make([]byte, length)
