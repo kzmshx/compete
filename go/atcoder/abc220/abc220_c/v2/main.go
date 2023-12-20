@@ -26,7 +26,17 @@ func main() {
 	Solve(r, w)
 }
 
-func UpperBound(s []int, x int) int {
+type signed interface{ ~int | ~int32 | ~int64 }
+
+type unsigned interface{ ~uint | ~uint32 | ~uint64 }
+
+type integer interface{ signed | unsigned }
+
+type float interface{ ~float32 | ~float64 }
+
+type ordered interface{ integer | float | ~string }
+
+func UpperBound[T ordered](s []T, x T) int {
 	l, r := 0, len(s)
 	for l < r {
 		m := int(uint(l+r) >> 1)
