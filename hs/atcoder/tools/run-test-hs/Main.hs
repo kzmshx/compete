@@ -5,8 +5,9 @@ import Data.Text.IO (readFile)
 import System.Directory (listDirectory)
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
-import System.FilePath (takeDirectory)
+import System.FilePath (takeDirectory, (</>))
 import System.Process (readProcess)
+import Text.XHtml (action)
 
 -- Pipe operator
 (|>) :: a -> (a -> b) -> b
@@ -23,19 +24,19 @@ joinPath :: String -> String -> String
 joinPath dir file = dir ++ "/" ++ file
 
 -- Find test case files
-findTestCaseFiles :: String -> IO [(String, String)]
-findTestCaseFiles dir = do
-  files <- listDirectory dir
-  let inputFiles = filter (isAffix "testcase_" "_input.txt") files |> map (joinPath dir) |> sort
+findTestCaseFiles :: String -> String -> IO [(String, String)]
+findTestCaseFiles contest problem = do
+  files <- listDirectory (contest </> problem)
+  let inputFiles = filter (isAffix "testcase_" "_input.txt") files |> map (joinPath (contest </> problem)) |> sort
   let outputFiles = map (\input -> take (length input - 10) input ++ "_output.txt") inputFiles
   return $ zip inputFiles outputFiles
 
 -- テストケースを実行
-runTestCase :: String -> String -> String -> IO (Bool, String, String, String)
-runTestCase solutionFile inputFile expectedFile = do
+runTestCase :: String -> String -> String -> String -> IO (Bool, String, String, String)
+runTestCase contest problem inputFile expectedFile = do
   input <- Data.Text.unpack <$> Data.Text.IO.readFile inputFile
   expected <- Data.Text.unpack <$> Data.Text.IO.readFile expectedFile
-  actual <- readProcess "runghc" [solutionFile] input
+  actual <- readProcess "sh" ["-c", "cd " ++ contest ++ " && cabal run " ++ problem] input
   return (actual == expected, input, expected, actual)
 
 -- テスト結果を表示
@@ -53,12 +54,11 @@ main :: IO ()
 main = do
   args <- getArgs
   case args of
-    [solutionFile] -> do
-      let dir = takeDirectory solutionFile
-      testCaseFiles <- findTestCaseFiles dir
+    [contest, problem] -> do
+      testCaseFiles <- findTestCaseFiles contest problem
       forM_ testCaseFiles $ \(inputFile, outputFile) -> do
-        result <- runTestCase solutionFile inputFile outputFile
+        result <- runTestCase contest problem inputFile outputFile
         printResult inputFile result
     _ -> do
-      putStrLn "Usage: runghc Main.hs <solution-file>"
+      putStrLn "Usage: ./tools/run-test <contest> <problem>"
       exitFailure
