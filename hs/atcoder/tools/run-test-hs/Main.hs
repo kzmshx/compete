@@ -6,7 +6,7 @@ import System.Directory (listDirectory)
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
 import System.FilePath (takeDirectory, (</>))
-import System.Process (readProcess)
+import System.Process (readProcess, system)
 import Text.XHtml (action)
 
 -- Pipe operator
@@ -36,7 +36,10 @@ runTestCase :: String -> String -> String -> String -> IO (Bool, String, String,
 runTestCase contest problem inputFile expectedFile = do
   input <- Data.Text.unpack <$> Data.Text.IO.readFile inputFile
   expected <- Data.Text.unpack <$> Data.Text.IO.readFile expectedFile
-  actual <- readProcess "sh" ["-c", "cd " ++ contest ++ " && cabal run " ++ problem] input
+  let buildCommand = "cd " ++ contest ++ " && cabal v2-build --offline " ++ problem
+  _ <- readProcess "sh" ["-c", buildCommand] ""
+  let executable = "cd " ++ contest ++ " && $(cabal list-bin " ++ problem ++ ")"
+  actual <- readProcess "sh" ["-c", executable] input
   return (actual == expected, input, expected, actual)
 
 -- テスト結果を表示
