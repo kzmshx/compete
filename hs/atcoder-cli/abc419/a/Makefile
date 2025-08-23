@@ -1,0 +1,2 @@
+t:
+	oj test --command "stack Main.hs" --directory tests --tle 2 --jobs 10
