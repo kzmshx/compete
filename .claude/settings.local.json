@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make:*)",
+      "WebFetch(domain:atcoder.jp)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
