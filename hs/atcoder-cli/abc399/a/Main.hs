@@ -1,3 +1,5 @@
+-- stack script --resolver lts-23.14
+
 (|>) :: a -> (a -> b) -> b
 x |> f = f x
 
