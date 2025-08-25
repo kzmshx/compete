@@ -322,6 +322,8 @@ func newPriorityQueueItem[T any, P Ordered](value T, priority P) *priorityQueueI
 	return &priorityQueueItem[T, P]{value: value, priority: priority}
 }
 
+func Maximum[T Ordered](lhs, rhs T) bool { return lhs < rhs }
+
 func Minimum[T Ordered](lhs, rhs T) bool { return lhs > rhs }
 
 type PriorityQueue[T any, P Ordered] struct {
@@ -336,12 +338,20 @@ func NewPriorityQueue[T any, P Ordered](heuristic func(lhs, rhs P) bool) *Priori
 	return &PriorityQueue[T, P]{items: items, itemCount: 0, comparator: heuristic}
 }
 
+func NewMaxPriorityQueue[T any, P Ordered]() *PriorityQueue[T, P] {
+	return NewPriorityQueue[T](Maximum[P])
+}
+
 func NewMinPriorityQueue[T any, P Ordered]() *PriorityQueue[T, P] {
 	return NewPriorityQueue[T](Minimum[P])
 }
 
 func (pq *PriorityQueue[T, P]) Size() uint {
 	return pq.itemCount
+}
+
+func (pq *PriorityQueue[T, P]) Empty() bool {
+	return pq.Size() == 0
 }
 
 func (pq *PriorityQueue[T, P]) less(lhs, rhs uint) bool {
@@ -380,7 +390,7 @@ func (pq *PriorityQueue[T, P]) Push(value T, priority P) {
 }
 
 func (pq *PriorityQueue[T, P]) Pop() (value T, priority P, ok bool) {
-	if pq.Size() < 1 {
+	if pq.Empty() {
 		ok = false
 		return
 	}
@@ -390,6 +400,14 @@ func (pq *PriorityQueue[T, P]) Pop() (value T, priority P, ok bool) {
 	pq.itemCount--
 	pq.sink(1)
 	return max.value, max.priority, true
+}
+
+func (pq *PriorityQueue[T, P]) Peek() (value T, priority P, ok bool) {
+	if pq.Empty() {
+		ok = false
+		return
+	}
+	return pq.items[1].value, pq.items[1].priority, true
 }
 
 // ================================================================
