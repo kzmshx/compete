@@ -22,7 +22,7 @@
 ## 擬似コード
 
 ```
-fn binary_search(l int, r int, f fn (int) -> bool) int {
+fn binary_search(l int, r int, f fn (int) bool) int {
 	for l < r {
 		m = (l + r) / 2
 		if f(m) {
@@ -34,25 +34,28 @@ fn binary_search(l int, r int, f fn (int) -> bool) int {
 	return l
 }
 
-fn intersect_1d(a [2]int, b [2]int) ([2]int, bool) {
+fn intersect_1d(a [2]int, b [2]int) [[2]int, bool] {
 	l = max(a[0], b[0])
 	r = min(a[1], b[1])
-	return ([l, r], min <= max)
+	return [[l, r], min <= max]
 }
 
-fn intersect_2d(a [2][2]int, b [2][2]int) ([2][2]int, bool) {
-	(row, ok_row) = intersect_1d(a[0], b[0])
-	(col, ok_col) = intersect_1d(a[1], b[1])
-	return ((row, col), ok_row && ok_col)
+fn intersect_2d(a [2][2]int, b [2][2]int) [[2][2]int, bool] {
+	[row, ok_row] = intersect_1d(a[0], b[0])
+	[col, ok_col] = intersect_1d(a[1], b[1])
+	return [[row, col], ok_row && ok_col]
 }
 
 fn main() {
-	let n int
-	let coords [][2]int
+	var n int
+	var coords [][2]int
 	binary_search(1, 10**9, fn (i int) bool {
-		(cur, ok) = (((1, 10**9), (1, 10**9)), true)
-		for _, c := range coords {
-			(cur, ok) = intersect_2d(cur, ((max(1, c[0]-i), min(10**9, c[0]+i)), (min(1, c[1]-i), max(10**9, c[1]+i))))
+		[cur, ok] = [[[1, 10**9], [1, 10**9]], true]
+		for _, c = range coords {
+			[cur, ok] = intersect_2d(cur, [
+				[max(1, c[0]-i), min(10**9, c[0]+i)],
+				[max(1, c[1]-i), min(10**9, c[1]+i)],
+			])
 			if !ok {
 				return false
 			}
