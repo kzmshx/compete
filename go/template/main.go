@@ -199,6 +199,22 @@ func GCD(a, b int) int {
 func LCM(a, b int) int { return a * b / GCD(a, b) }
 
 // ================================================================
+// Binary Search
+// ================================================================
+
+func BinarySearch[T Integer](l, r T, f func(T) bool) T {
+	for l < r {
+		m := T(uint(l+r) >> 1)
+		if f(m) {
+			r = m
+		} else {
+			l = m + 1
+		}
+	}
+	return l
+}
+
+// ================================================================
 // Slices
 // ================================================================
 
@@ -227,34 +243,16 @@ func Contains[T comparable](s []T, e T) bool {
 	return Any(s, func(x T) bool { return x == e })
 }
 
-// LowerBound returns the first index i in [0, n) such that a[i] >= x.
+// SliceLowerBound returns the first index i in [0, n) such that a[i] >= x.
 // If there is no such index, it returns n.
-func LowerBound[T Ordered](s []T, x T) int {
-	l, r := 0, len(s)
-	for l < r {
-		m := int(uint(l+r) >> 1)
-		if s[m] < x {
-			l = m + 1
-		} else {
-			r = m
-		}
-	}
-	return l
+func SliceLowerBound[T Ordered](s []T, x T) int {
+	return BinarySearch(0, len(s), func(i int) bool { return s[i] >= x })
 }
 
-// UpperBound returns the first index i in [0, n) such that a[i] > x.
+// SliceUpperBound returns the first index i in [0, n) such that a[i] > x.
 // If there is no such index, it returns n.
-func UpperBound[T Ordered](s []T, x T) int {
-	l, r := 0, len(s)
-	for l < r {
-		m := int(uint(l+r) >> 1)
-		if s[m] <= x {
-			l = m + 1
-		} else {
-			r = m
-		}
-	}
-	return l
+func SliceUpperBound[T Ordered](s []T, x T) int {
+	return BinarySearch(0, len(s), func(i int) bool { return s[i] > x })
 }
 
 // ================================================================
@@ -459,4 +457,15 @@ func RenderGraph(graph [][]int, root int) {
 	}
 
 	w.Println("```")
+}
+
+func Intersect1D[T Ordered](a, b [2]T) ([2]T, bool) {
+	min, max := Max(a[0], b[0]), Min(a[1], b[1])
+	return [2]T{min, max}, min <= max
+}
+
+func Intersect2D[T Ordered](a, b [2][2]T) ([2][2]T, bool) {
+	rowRange, okRowRange := Intersect1D(a[0], b[0])
+	colRange, okColRange := Intersect1D(a[1], b[1])
+	return [2][2]T{rowRange, colRange}, okRowRange && okColRange
 }
