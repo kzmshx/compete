@@ -31,7 +31,12 @@
       "id": "abc419_c",
       "label": "C",
       "title": "King's Summit",
-      "url": "https://atcoder.jp/contests/abc419/tasks/abc419_c"
+      "url": "https://atcoder.jp/contests/abc419/tasks/abc419_c",
+      "directory": {
+        "path": "c",
+        "testdir": "tests",
+        "submit": "main.go"
+      }
     },
     {
       "id": "abc419_d",
