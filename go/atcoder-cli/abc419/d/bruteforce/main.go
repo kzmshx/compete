@@ -1,0 +1,400 @@
+package main
+
+import (
+	"bufio"
+	"crypto/rand"
+	"fmt"
+	"io"
+	"os"
+	"strconv"
+)
+
+func Solve(r *Scanner, w *Writer) {
+	_, m, s, t := r.Int(), r.Int(), r.String(), r.String()
+	ops := make([][2]int, m)
+	for i := range ops {
+		ops[i] = [2]int{r.Int() - 1, r.Int() - 1}
+	}
+	for _, op := range ops {
+		s, t = s[:op[0]]+t[op[0]:op[1]]+s[op[1]:], t[:op[0]]+s[op[0]:op[1]]+t[op[1]:]
+	}
+	w.Println(s)
+}
+
+func main() {
+	r, w := NewScanner(os.Stdin, MaxBufferSize), NewWriter(os.Stdout)
+	defer w.Flush()
+	Solve(r, w)
+}
+
+const MaxBufferSize = 1 * 1024 * 1024
+
+type Scanner struct{ sc *bufio.Scanner }
+
+func NewScanner(r io.Reader, size int) *Scanner {
+	sc := bufio.NewScanner(r)
+	sc.Buffer(make([]byte, size), size)
+	sc.Split(bufio.ScanWords)
+	return &Scanner{sc}
+}
+
+func (s *Scanner) scan() bool { return s.sc.Scan() }
+
+func (s *Scanner) text() string { return s.sc.Text() }
+
+func (s *Scanner) String() string { s.scan(); return s.text() }
+
+func (s *Scanner) Int() int { return Atoi(s.String()) }
+
+func (s *Scanner) Float64() float64 { return Atof(s.String()) }
+
+type Writer struct{ bf *bufio.Writer }
+
+func NewWriter(w io.Writer) *Writer { return &Writer{bufio.NewWriter(w)} }
+
+func (w *Writer) Print(a ...any) { fmt.Fprint(w.bf, a...) }
+
+func (w *Writer) Printf(format string, a ...any) { fmt.Fprintf(w.bf, format, a...) }
+
+func (w *Writer) Println(a ...any) { fmt.Fprintln(w.bf, a...) }
+
+func (w *Writer) Flush() { w.bf.Flush() }
+
+type Signed interface{ ~int | ~int32 | ~int64 }
+
+type Unsigned interface{ ~uint | ~uint32 | ~uint64 }
+
+type Integer interface{ Signed | Unsigned }
+
+type Float interface{ ~float32 | ~float64 }
+
+type Actual interface{ Integer | Float }
+
+type Imaginary interface{ ~complex64 | ~complex128 }
+
+type Ordered interface{ Integer | Float | ~string }
+
+type Addable interface {
+	Integer | Float | Imaginary | ~string
+}
+
+func Unwrap[T any](value T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return value
+}
+
+func Atoi(s string) int { return Unwrap(strconv.Atoi(s)) }
+
+func Atof(s string) float64 { return Unwrap(strconv.ParseFloat(s, 64)) }
+
+func Itoa(i int) string { return strconv.Itoa(i) }
+
+func Bin[T Integer](n T) string { return strconv.FormatInt(int64(n), 2) }
+
+func Oct[T Integer](n T) string { return strconv.FormatInt(int64(n), 8) }
+
+func Hex[T Integer](n T) string { return strconv.FormatInt(int64(n), 16) }
+
+func ParseInt(s string, b int) int { return int(Unwrap(strconv.ParseInt(s, b, 64))) }
+
+func Digits[T Integer](n T, base T) (r []T) {
+	for n > 0 {
+		r = append(r, n%base)
+		n /= base
+	}
+	return r
+}
+
+func Max[T Ordered](a, b T) T {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func Min[T Ordered](a, b T) T {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func ChooseMax[T Ordered](a *T, b T) T {
+	if *a < b {
+		*a = b
+	}
+	return *a
+}
+
+func ChooseMin[T Ordered](a *T, b T) T {
+	if *a > b {
+		*a = b
+	}
+	return *a
+}
+
+func Abs[T Actual](x T) T {
+	if x < T(0) {
+		return -x
+	}
+	return x
+}
+
+func Pow[T Actual](x T, n int) T {
+	y := T(1)
+	for n > 0 {
+		if n&1 == 1 {
+			y *= x
+		}
+		x *= x
+		n >>= 1
+	}
+	return y
+}
+
+func GCD(a, b int) int {
+	for b != 0 {
+		a, b = b, a%b
+	}
+	return a
+}
+
+func LCM(a, b int) int { return a * b / GCD(a, b) }
+
+func BinarySearch[T Integer](l, r T, f func(T) bool) T {
+	for l < r {
+		m := T(uint(l+r) >> 1)
+		if f(m) {
+			r = m
+		} else {
+			l = m + 1
+		}
+	}
+	return l
+}
+
+func All[T any](s []T, f func(T) bool) bool {
+	for _, v := range s {
+		if !f(v) {
+			return false
+		}
+	}
+	return true
+}
+
+func Any[T any](s []T, f func(T) bool) bool {
+	for _, v := range s {
+		if f(v) {
+			return true
+		}
+	}
+	return false
+}
+
+func Contains[T comparable](s []T, e T) bool {
+	return Any(s, func(x T) bool { return x == e })
+}
+
+func SliceLowerBound[T Ordered](s []T, x T) int {
+	return BinarySearch(0, len(s), func(i int) bool { return s[i] >= x })
+}
+
+func SliceUpperBound[T Ordered](s []T, x T) int {
+	return BinarySearch(0, len(s), func(i int) bool { return s[i] > x })
+}
+
+type UnionFind struct {
+	parent []int
+	size   []int
+}
+
+func NewUnionFind(n int) *UnionFind {
+	u := &UnionFind{parent: make([]int, n), size: make([]int, n)}
+	for i := 0; i < n; i++ {
+		u.parent[i], u.size[i] = -1, 1
+	}
+	return u
+}
+
+func (u *UnionFind) Union(x, y int) bool {
+	xRoot, yRoot := u.Find(x), u.Find(y)
+	if xRoot == yRoot {
+		return false
+	}
+
+	if u.size[xRoot] < u.size[yRoot] {
+		xRoot, yRoot = yRoot, xRoot
+	}
+	u.parent[yRoot] = xRoot
+	u.size[xRoot] += u.size[yRoot]
+	return true
+}
+
+func (u *UnionFind) Find(x int) int {
+
+	if u.parent[x] == -1 {
+		return x
+	}
+
+	u.parent[x] = u.Find(u.parent[x])
+	return u.parent[x]
+}
+
+func (u *UnionFind) IsSame(x, y int) bool { return u.Find(x) == u.Find(y) }
+
+func (u *UnionFind) Size(x int) int { return u.size[u.Find(x)] }
+
+type priorityQueueItem[T any, P Ordered] struct {
+	value    T
+	priority P
+}
+
+func newPriorityQueueItem[T any, P Ordered](value T, priority P) *priorityQueueItem[T, P] {
+	return &priorityQueueItem[T, P]{value: value, priority: priority}
+}
+
+func Maximum[T Ordered](lhs, rhs T) bool { return lhs < rhs }
+
+func Minimum[T Ordered](lhs, rhs T) bool { return lhs > rhs }
+
+type PriorityQueue[T any, P Ordered] struct {
+	items      []*priorityQueueItem[T, P]
+	itemCount  uint
+	comparator func(lhs, rhs P) bool
+}
+
+func NewPriorityQueue[T any, P Ordered](heuristic func(lhs, rhs P) bool) *PriorityQueue[T, P] {
+	items := make([]*priorityQueueItem[T, P], 1)
+	items[0] = nil
+	return &PriorityQueue[T, P]{items: items, itemCount: 0, comparator: heuristic}
+}
+
+func NewMaxPriorityQueue[T any, P Ordered]() *PriorityQueue[T, P] {
+	return NewPriorityQueue[T](Maximum[P])
+}
+
+func NewMinPriorityQueue[T any, P Ordered]() *PriorityQueue[T, P] {
+	return NewPriorityQueue[T](Minimum[P])
+}
+
+func (pq *PriorityQueue[T, P]) Size() uint {
+	return pq.itemCount
+}
+
+func (pq *PriorityQueue[T, P]) Empty() bool {
+	return pq.Size() == 0
+}
+
+func (pq *PriorityQueue[T, P]) less(lhs, rhs uint) bool {
+	return pq.comparator(pq.items[lhs].priority, pq.items[rhs].priority)
+}
+
+func (pq *PriorityQueue[T, P]) swap(lhs, rhs uint) {
+	pq.items[lhs], pq.items[rhs] = pq.items[rhs], pq.items[lhs]
+}
+
+func (pq *PriorityQueue[T, P]) sink(k uint) {
+	for 2*k <= pq.Size() {
+		j := 2 * k
+		if j < pq.Size() && pq.less(j, j+1) {
+			j++
+		}
+		if !pq.less(k, j) {
+			break
+		}
+		pq.swap(k, j)
+		k = j
+	}
+}
+
+func (pq *PriorityQueue[T, P]) swim(k uint) {
+	for k > 1 && pq.less(k/2, k) {
+		pq.swap(k/2, k)
+		k /= 2
+	}
+}
+
+func (pq *PriorityQueue[T, P]) Push(value T, priority P) {
+	pq.items = append(pq.items, newPriorityQueueItem(value, priority))
+	pq.itemCount++
+	pq.swim(pq.Size())
+}
+
+func (pq *PriorityQueue[T, P]) Pop() (value T, priority P, ok bool) {
+	if pq.Empty() {
+		ok = false
+		return
+	}
+	max := pq.items[1]
+	pq.swap(1, pq.Size())
+	pq.items = pq.items[0:pq.Size()]
+	pq.itemCount--
+	pq.sink(1)
+	return max.value, max.priority, true
+}
+
+func (pq *PriorityQueue[T, P]) Peek() (value T, priority P, ok bool) {
+	if pq.Empty() {
+		ok = false
+		return
+	}
+	return pq.items[1].value, pq.items[1].priority, true
+}
+
+func RandomString(length int) string {
+	b := make([]byte, length)
+	if _, err := rand.Read(b); err != nil {
+		panic(err)
+	}
+	return fmt.Sprintf("%x", b)
+}
+
+func RenderGraph(graph [][]int, root int) {
+	filename := fmt.Sprintf("graph-%s.md", RandomString(8))
+	f, err := os.Create(filename)
+	if err != nil {
+		panic(err)
+	}
+
+	w := NewWriter(f)
+	defer w.Flush()
+
+	w.Println("```mermaid")
+	w.Println("graph TD;")
+
+	visited := make([]bool, len(graph))
+
+	q := []int{root}
+	visited[root] = true
+	w.Printf("  %d((%d))\n", root, root)
+
+	for len(q) > 0 {
+		v := q[0]
+		q = q[1:]
+		for _, n := range graph[v] {
+			if visited[n] {
+				continue
+			}
+
+			q = append(q, n)
+			visited[n] = true
+			w.Printf("  %d((%d))\n", n, n)
+			w.Printf("  %d --- %d\n", v, n)
+		}
+	}
+
+	w.Println("```")
+}
+
+func Intersect1D[T Ordered](a, b [2]T) ([2]T, bool) {
+	min, max := Max(a[0], b[0]), Min(a[1], b[1])
+	return [2]T{min, max}, min <= max
+}
+
+func Intersect2D[T Ordered](a, b [2][2]T) ([2][2]T, bool) {
+	rowRange, okRowRange := Intersect1D(a[0], b[0])
+	colRange, okColRange := Intersect1D(a[1], b[1])
+	return [2][2]T{rowRange, colRange}, okRowRange && okColRange
+}
