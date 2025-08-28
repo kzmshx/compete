@@ -33,57 +33,31 @@ func NewScanner(r io.Reader, size int) *Scanner {
 	sc.Split(bufio.ScanWords)
 	return &Scanner{sc}
 }
-
-func (s *Scanner) scan() bool { return s.sc.Scan() }
-
-func (s *Scanner) text() string { return s.sc.Text() }
-
-func (s *Scanner) String() string { s.scan(); return s.text() }
-
-func (s *Scanner) Int() int { return Atoi(s.String()) }
-
+func (s *Scanner) scan() bool       { return s.sc.Scan() }
+func (s *Scanner) text() string     { return s.sc.Text() }
+func (s *Scanner) String() string   { s.scan(); return s.text() }
+func (s *Scanner) Int() int         { return Atoi(s.String()) }
 func (s *Scanner) Float64() float64 { return Atof(s.String()) }
 
 type Writer struct{ bf *bufio.Writer }
 
-func NewWriter(w io.Writer) *Writer { return &Writer{bufio.NewWriter(w)} }
-
-func (w *Writer) Print(a ...any) { fmt.Fprint(w.bf, a...) }
-
+func NewWriter(w io.Writer) *Writer              { return &Writer{bufio.NewWriter(w)} }
+func (w *Writer) Print(a ...any)                 { fmt.Fprint(w.bf, a...) }
 func (w *Writer) Printf(format string, a ...any) { fmt.Fprintf(w.bf, format, a...) }
-
-func (w *Writer) Println(a ...any) { fmt.Fprintln(w.bf, a...) }
-
-func (w *Writer) Flush() { w.bf.Flush() }
+func (w *Writer) Println(a ...any)               { fmt.Fprintln(w.bf, a...) }
+func (w *Writer) Flush()                         { w.bf.Flush() }
 
 // ================================================================
 // Constraints
 // ================================================================
 
-// Signed is a constraint that permits any Signed integer type.
-// int8, int16 are not included because they are rarely used.
 type Signed interface{ ~int | ~int32 | ~int64 }
-
-// Unsigned is a constraint that permits any Unsigned integer type.
-// uint8, uint16, uintptr are not included because they are rarely used.
 type Unsigned interface{ ~uint | ~uint32 | ~uint64 }
-
-// Integer is a constraint that permits any Integer type.
 type Integer interface{ Signed | Unsigned }
-
-// Float is a constraint that permits any floating-point type.
 type Float interface{ ~float32 | ~float64 }
-
-// Actual is a constraint that permits any complex numeric type.
 type Actual interface{ Integer | Float }
-
-// Imaginary is a constraint that permits any complex numeric type.
 type Imaginary interface{ ~complex64 | ~complex128 }
-
-// Ordered is a constraint that permits any Ordered type: any type
 type Ordered interface{ Integer | Float | ~string }
-
-// Addable is a constraint that permits any ordered type: any type
 type Addable interface {
 	Integer | Float | Imaginary | ~string
 }
@@ -92,33 +66,12 @@ type Addable interface {
 // Conversion
 // ================================================================
 
-// Unwrap returns v if err is nil, otherwise panics with err.
-func Unwrap[T any](value T, err error) T {
-	if err != nil {
-		panic(err)
-	}
-	return value
-}
-
-// Atoi converts string s to int.
-func Atoi(s string) int { return Unwrap(strconv.Atoi(s)) }
-
-// Atof converts string s to float64.
-func Atof(s string) float64 { return Unwrap(strconv.ParseFloat(s, 64)) }
-
-// Itoa converts int i to string.
-func Itoa(i int) string { return strconv.Itoa(i) }
-
-// Bin returns the binary representation of n.
-func Bin[T Integer](n T) string { return strconv.FormatInt(int64(n), 2) }
-
-// Oct returns the octal representation of n.
-func Oct[T Integer](n T) string { return strconv.FormatInt(int64(n), 8) }
-
-// Hex returns the hexadecimal representation of n.
-func Hex[T Integer](n T) string { return strconv.FormatInt(int64(n), 16) }
-
-// ParseInt converts s to int in base b.
+func Atoi(s string) int            { return Unwrap(strconv.Atoi(s)) }
+func Atof(s string) float64        { return Unwrap(strconv.ParseFloat(s, 64)) }
+func Itoa(i int) string            { return strconv.Itoa(i) }
+func Bin[T Integer](n T) string    { return strconv.FormatInt(int64(n), 2) }
+func Oct[T Integer](n T) string    { return strconv.FormatInt(int64(n), 8) }
+func Hex[T Integer](n T) string    { return strconv.FormatInt(int64(n), 16) }
 func ParseInt(s string, b int) int { return int(Unwrap(strconv.ParseInt(s, b, 64))) }
 
 // ================================================================
@@ -196,7 +149,9 @@ func GCD(a, b int) int {
 }
 
 // LCM returns the least common multiple of a and b.
-func LCM(a, b int) int { return a * b / GCD(a, b) }
+func LCM(a, b int) int {
+	return a * b / GCD(a, b)
+}
 
 // ================================================================
 // Binary Search
@@ -311,6 +266,9 @@ func (u *UnionFind) Size(x int) int { return u.size[u.Find(x)] }
 // Priority Queue
 // ================================================================
 
+func Maximum[T Ordered](lhs, rhs T) bool { return lhs < rhs }
+func Minimum[T Ordered](lhs, rhs T) bool { return lhs > rhs }
+
 type priorityQueueItem[T any, P Ordered] struct {
 	value    T
 	priority P
@@ -319,10 +277,6 @@ type priorityQueueItem[T any, P Ordered] struct {
 func newPriorityQueueItem[T any, P Ordered](value T, priority P) *priorityQueueItem[T, P] {
 	return &priorityQueueItem[T, P]{value: value, priority: priority}
 }
-
-func Maximum[T Ordered](lhs, rhs T) bool { return lhs < rhs }
-
-func Minimum[T Ordered](lhs, rhs T) bool { return lhs > rhs }
 
 type PriorityQueue[T any, P Ordered] struct {
 	items      []*priorityQueueItem[T, P]
@@ -335,11 +289,9 @@ func NewPriorityQueue[T any, P Ordered](heuristic func(lhs, rhs P) bool) *Priori
 	items[0] = nil
 	return &PriorityQueue[T, P]{items: items, itemCount: 0, comparator: heuristic}
 }
-
 func NewMaxPriorityQueue[T any, P Ordered]() *PriorityQueue[T, P] {
 	return NewPriorityQueue[T](Maximum[P])
 }
-
 func NewMinPriorityQueue[T any, P Ordered]() *PriorityQueue[T, P] {
 	return NewPriorityQueue[T](Minimum[P])
 }
@@ -412,9 +364,7 @@ func (pq *PriorityQueue[T, P]) Peek() (value T, priority P, ok bool) {
 // Difference Array
 // ================================================================
 
-type Diff[T Actual] struct {
-	delta []T
-}
+type Diff[T Actual] struct{ delta []T }
 
 func NewDiff[T Actual](size int) *Diff[T] {
 	return &Diff[T]{delta: make([]T, size+1)}
@@ -443,6 +393,13 @@ func (d *Diff[T]) Build() []T {
 // ================================================================
 // Utilities
 // ================================================================
+
+func Unwrap[T any](value T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return value
+}
 
 // RandomString generates a random string of length n.
 func RandomString(length int) string {
