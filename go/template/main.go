@@ -409,6 +409,38 @@ func (pq *PriorityQueue[T, P]) Peek() (value T, priority P, ok bool) {
 }
 
 // ================================================================
+// Difference Array
+// ================================================================
+
+type Diff[T Actual] struct {
+	delta []T
+}
+
+func NewDiff[T Actual](size int) *Diff[T] {
+	return &Diff[T]{delta: make([]T, size+1)}
+}
+
+func (d *Diff[T]) Add(l, r int, val T) {
+	d.delta[l] += val
+	d.delta[r] -= val
+}
+
+func (d *Diff[T]) Increment(l, r int) {
+	d.Add(l, r, 1)
+}
+
+func (d *Diff[T]) Build() []T {
+	size := len(d.delta) - 1
+	result := make([]T, size)
+	var sum T
+	for i := 0; i < size; i++ {
+		sum += d.delta[i]
+		result[i] = sum
+	}
+	return result
+}
+
+// ================================================================
 // Utilities
 // ================================================================
 
