@@ -1,8 +1,8 @@
 
 | key  | value                                             |
 | :--- | :------------------------------------------------ |
-| url  | https://atcoder.jp/contests/abc419/tasks/abc419_c |
-| tags | #二分探索 #チェビシェフ距離 #座標範囲の交差 #LowerBound              |
+| URL  | https://atcoder.jp/contests/abc419/tasks/abc419_c |
+| Tags | #二分探索 #チェビシェフ距離 #座標範囲の交差 #LowerBound              |
 
 ## 考察
 
