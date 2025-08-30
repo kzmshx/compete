@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"slices"
 	"strconv"
 )
 
@@ -12,9 +13,12 @@ func FibRev(n uint, memo map[uint]int) int {
 	if v, ok := memo[n]; ok {
 		return v
 	}
-	v := ParseInt(string(Reverse([]rune(Dec(FibRev(n-1, memo)+FibRev(n-2, memo))))), 10)
-	memo[n] = v
-	return v
+	sum := FibRev(n-1, memo) + FibRev(n-2, memo)
+	sumStr := []rune(Itoa(sum))
+	slices.Reverse(sumStr)
+	sumRev := Atoi(string(sumStr))
+	memo[n] = sumRev
+	return sumRev
 }
 
 func Solve(r *Scanner, w *Writer) {
@@ -63,16 +67,8 @@ type Addable interface {
 	Integer | Float | Imaginary | ~string
 }
 
-func Atoi(s string) int            { return Unwrap(strconv.Atoi(s)) }
-func Dec[T Integer](n T) string    { return strconv.FormatInt(int64(n), 10) }
-func ParseInt(s string, b int) int { return int(Unwrap(strconv.ParseInt(s, b, 64))) }
-
-func Reverse[T any](s []T) []T {
-	for i := 0; i < len(s)/2; i++ {
-		s[i], s[len(s)-1-i] = s[len(s)-1-i], s[i]
-	}
-	return s
-}
+func Itoa(i int) string { return strconv.Itoa(i) }
+func Atoi(s string) int { return Unwrap(strconv.Atoi(s)) }
 
 type UnionFind struct {
 	parent []int
