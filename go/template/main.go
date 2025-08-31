@@ -9,12 +9,12 @@ import (
 	"strconv"
 )
 
-func Solve(r *Scanner, w *Writer) {
+func Solve(r *Reader, w *Writer) {
 	w.Println(r.Int())
 }
 
 func main() {
-	r, w := NewScanner(os.Stdin, MaxBufferSize), NewWriter(os.Stdout)
+	r, w := NewReader(os.Stdin, MaxBufferSize), NewWriter(os.Stdout)
 	defer w.Flush()
 	Solve(r, w)
 }
@@ -25,19 +25,19 @@ func main() {
 
 const MaxBufferSize = 1 * 1024 * 1024
 
-type Scanner struct{ sc *bufio.Scanner }
+type Reader struct{ sc *bufio.Scanner }
 
-func NewScanner(r io.Reader, size int) *Scanner {
+func NewReader(r io.Reader, size int) *Reader {
 	sc := bufio.NewScanner(r)
 	sc.Buffer(make([]byte, size), size)
 	sc.Split(bufio.ScanWords)
-	return &Scanner{sc}
+	return &Reader{sc}
 }
-func (s *Scanner) scan() bool       { return s.sc.Scan() }
-func (s *Scanner) text() string     { return s.sc.Text() }
-func (s *Scanner) String() string   { s.scan(); return s.text() }
-func (s *Scanner) Int() int         { return Atoi(s.String()) }
-func (s *Scanner) Float64() float64 { return Atof(s.String()) }
+func (r *Reader) scan() bool       { return r.sc.Scan() }
+func (r *Reader) text() string     { return r.sc.Text() }
+func (r *Reader) String() string   { r.scan(); return r.text() }
+func (r *Reader) Int() int         { return Atoi(r.String()) }
+func (r *Reader) Float64() float64 { return Atof(r.String()) }
 
 type Writer struct{ bf *bufio.Writer }
 
@@ -78,7 +78,7 @@ func ParseInt(s string, b int) int { return int(Unwrap(strconv.ParseInt(s, b, 64
 // Math
 // ================================================================
 
-// Digits returns the digits of n with base
+// Digits は base 進数で n を表す数字の配列を返す
 func Digits[T Integer](n T, base T) (r []T) {
 	for n > 0 {
 		r = append(r, n%base)
@@ -87,7 +87,7 @@ func Digits[T Integer](n T, base T) (r []T) {
 	return r
 }
 
-// Max returns the maximum of a and b.
+// Max は a と b の最大値を返す
 func Max[T Ordered](a, b T) T {
 	if a > b {
 		return a
@@ -95,7 +95,7 @@ func Max[T Ordered](a, b T) T {
 	return b
 }
 
-// Min returns the minimum of a and b.
+// Min は a と b の最小値を返す
 func Min[T Ordered](a, b T) T {
 	if a < b {
 		return a
@@ -103,7 +103,7 @@ func Min[T Ordered](a, b T) T {
 	return b
 }
 
-// ChooseMax sets the maximum value of a and b to a and returns the maximum value.
+// ChooseMax は a と b の最大値を a に設定して返す
 func ChooseMax[T Ordered](a *T, b T) T {
 	if *a < b {
 		*a = b
@@ -111,7 +111,7 @@ func ChooseMax[T Ordered](a *T, b T) T {
 	return *a
 }
 
-// ChooseMin sets the minimum value of a and b to a and returns the minimum value.
+// ChooseMin は a と b の最小値を a に設定して返す
 func ChooseMin[T Ordered](a *T, b T) T {
 	if *a > b {
 		*a = b
@@ -119,7 +119,7 @@ func ChooseMin[T Ordered](a *T, b T) T {
 	return *a
 }
 
-// Abs returns the absolute value of x.
+// Abs は x の絶対値を返す
 func Abs[T Actual](x T) T {
 	if x < T(0) {
 		return -x
@@ -127,7 +127,7 @@ func Abs[T Actual](x T) T {
 	return x
 }
 
-// Pow returns x**n, the base-x exponential of n.
+// Pow は x の n 乗を返す
 func Pow[T Actual](x T, n int) T {
 	y := T(1)
 	for n > 0 {
@@ -140,7 +140,7 @@ func Pow[T Actual](x T, n int) T {
 	return y
 }
 
-// GCD returns the greatest common divisor of a and b.
+// GCD は a と b の最大公約数を返す
 func GCD(a, b int) int {
 	for b != 0 {
 		a, b = b, a%b
@@ -148,7 +148,7 @@ func GCD(a, b int) int {
 	return a
 }
 
-// LCM returns the least common multiple of a and b.
+// LCM は a と b の最小公倍数を返す
 func LCM(a, b int) int {
 	return a * b / GCD(a, b)
 }
@@ -157,6 +157,7 @@ func LCM(a, b int) int {
 // Binary Search
 // ================================================================
 
+// BinarySearch は [l, r) の範囲で f が真となる最小の T を返す、f が真となる要素が存在しない場合は r を返す
 func BinarySearch[T Integer](l, r T, f func(T) bool) T {
 	for l < r {
 		m := T(uint(l+r) >> 1)
@@ -173,7 +174,16 @@ func BinarySearch[T Integer](l, r T, f func(T) bool) T {
 // Slices
 // ================================================================
 
-// All checks if all elements in s satisfy f.
+// MakeSlice は長さ n のスライスを作成し、各要素を f で初期化して返す
+func MakeSlice[T any](n int, f func(i int) T) []T {
+	a := make([]T, n)
+	for i := range a {
+		a[i] = f(i)
+	}
+	return a
+}
+
+// All は s のすべての要素が f を満たすかどうかを返す
 func All[T any](s []T, f func(T) bool) bool {
 	for _, v := range s {
 		if !f(v) {
@@ -183,7 +193,7 @@ func All[T any](s []T, f func(T) bool) bool {
 	return true
 }
 
-// Any checks if any element in s satisfies f.
+// Any は s のいずれかの要素が f を満たすかどうかを返す
 func Any[T any](s []T, f func(T) bool) bool {
 	for _, v := range s {
 		if f(v) {
@@ -193,21 +203,96 @@ func Any[T any](s []T, f func(T) bool) bool {
 	return false
 }
 
-// Contains checks if s contains e.
-func Contains[T comparable](s []T, e T) bool {
-	return Any(s, func(x T) bool { return x == e })
-}
-
-// SliceLowerBound returns the first index i in [0, n) such that a[i] >= x.
-// If there is no such index, it returns n.
+// SliceLowerBound は a[i] >= x となる最初の i を返す、そのような i が存在しない場合は n を返す
 func SliceLowerBound[T Ordered](s []T, x T) int {
 	return BinarySearch(0, len(s), func(i int) bool { return s[i] >= x })
 }
 
-// SliceUpperBound returns the first index i in [0, n) such that a[i] > x.
-// If there is no such index, it returns n.
+// SliceUpperBound は a[i] > x となる最初の i を返す、そのような i が存在しない場合は n を返す
 func SliceUpperBound[T Ordered](s []T, x T) int {
 	return BinarySearch(0, len(s), func(i int) bool { return s[i] > x })
+}
+
+// ================================================================
+// ModInt モジュラー整数
+//
+// ModInt は剰余演算を自動的に実行する。
+// ================================================================
+
+type ModInt[T Integer] struct {
+	v T
+	m T
+}
+
+func NewModInt[T Integer](v, m T) ModInt[T] {
+	v %= m
+	if v < 0 {
+		v += m
+	}
+	return ModInt[T]{v: v, m: m}
+}
+
+func (z ModInt[T]) assertModulus(x ModInt[T], op string) {
+	if z.m != x.m {
+		panic(fmt.Sprintf("ModInt: "+op+": modulus mismatch %v != %v", z.m, x.m))
+	}
+}
+
+func (z ModInt[T]) Value() T {
+	return z.v
+}
+
+func (z ModInt[T]) Add(x ModInt[T]) ModInt[T] {
+	z.assertModulus(x, "Add")
+	res := z.v + x.v
+	if res >= z.m {
+		res -= z.m
+	}
+	return ModInt[T]{v: res, m: z.m}
+}
+
+func (z ModInt[T]) Sub(x ModInt[T]) ModInt[T] {
+	z.assertModulus(x, "Sub")
+	res := z.v - x.v
+	if res < 0 {
+		res += z.m
+	}
+	return ModInt[T]{v: res, m: z.m}
+}
+
+func (z ModInt[T]) Mul(x ModInt[T]) ModInt[T] {
+	z.assertModulus(x, "Mul")
+	return ModInt[T]{v: (z.v * x.v) % z.m, m: z.m}
+}
+
+func (z ModInt[T]) Pow(n T) ModInt[T] {
+	if n < 0 {
+		return z.Inv().Pow(-n)
+	}
+	ret := NewModInt(1, z.m)
+	base := z
+	for n > 0 {
+		if n&1 == 1 {
+			ret = ret.Mul(base)
+		}
+		base = base.Mul(base)
+		n >>= 1
+	}
+	return ret
+}
+
+func (z ModInt[T]) Inv() ModInt[T] {
+	z.assertModulus(z, "Inv")
+	return z.Pow(z.m - 2)
+}
+
+func (z ModInt[T]) Div(x ModInt[T]) ModInt[T] {
+	z.assertModulus(x, "Div")
+	return z.Mul(x.Inv())
+}
+
+func (z ModInt[T]) Equals(x ModInt[T]) bool {
+	return z.v == x.v && z.m == x.m
 }
 
 // ================================================================
