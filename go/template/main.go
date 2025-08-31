@@ -214,9 +214,38 @@ func SliceUpperBound[T Ordered](s []T, x T) int {
 }
 
 // ================================================================
+// CyclicInt 循環整数
+// ================================================================
+
+type CyclicInt[T Signed] struct {
+	v T
+	c T
+}
+
+func NewCyclicInt[T Signed](v, c T) CyclicInt[T] {
+	v = ((v-1)%c+c)%c + 1
+	return CyclicInt[T]{v: v, c: c}
+}
+
+func (z CyclicInt[T]) Value() T {
+	return z.v
+}
+
+func (z CyclicInt[T]) Advance(x T) CyclicInt[T] {
+	v := ((z.v-1+x)%z.c+z.c)%z.c + 1
+	return NewCyclicInt(v, z.c)
+}
+
+func (z CyclicInt[T]) Increment() CyclicInt[T] {
+	return z.Advance(1)
+}
+
+func (z CyclicInt[T]) Decrement() CyclicInt[T] {
+	return z.Advance(-1)
+}
+
+// ================================================================
 // ModInt モジュラー整数
-//
-// ModInt は剰余演算を自動的に実行する。
 // ================================================================
 
 type ModInt[T Integer] struct {
