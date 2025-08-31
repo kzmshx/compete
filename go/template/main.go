@@ -33,9 +33,7 @@ func NewReader(r io.Reader, size int) *Reader {
 	sc.Split(bufio.ScanWords)
 	return &Reader{sc}
 }
-func (r *Reader) scan() bool       { return r.sc.Scan() }
-func (r *Reader) text() string     { return r.sc.Text() }
-func (r *Reader) String() string   { r.scan(); return r.text() }
+func (r *Reader) String() string   { r.sc.Scan(); return r.sc.Text() }
 func (r *Reader) Int() int         { return Atoi(r.String()) }
 func (r *Reader) Float64() float64 { return Atof(r.String()) }
 
