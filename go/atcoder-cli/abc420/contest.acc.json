@@ -20,7 +20,12 @@
       "id": "abc420_b",
       "label": "B",
       "title": "Most Minority",
-      "url": "https://atcoder.jp/contests/abc420/tasks/abc420_b"
+      "url": "https://atcoder.jp/contests/abc420/tasks/abc420_b",
+      "directory": {
+        "path": "b",
+        "testdir": "tests",
+        "submit": "main.go"
+      }
     },
     {
       "id": "abc420_c",
