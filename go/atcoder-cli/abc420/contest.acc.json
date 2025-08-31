@@ -1,0 +1,56 @@
+{
+  "contest": {
+    "id": "abc420",
+    "title": "AtCoder Beginner Contest 420",
+    "url": "https://atcoder.jp/contests/abc420"
+  },
+  "tasks": [
+    {
+      "id": "abc420_a",
+      "label": "A",
+      "title": "What month is it?",
+      "url": "https://atcoder.jp/contests/abc420/tasks/abc420_a",
+      "directory": {
+        "path": "a",
+        "testdir": "tests",
+        "submit": "main.go"
+      }
+    },
+    {
+      "id": "abc420_b",
+      "label": "B",
+      "title": "Most Minority",
+      "url": "https://atcoder.jp/contests/abc420/tasks/abc420_b"
+    },
+    {
+      "id": "abc420_c",
+      "label": "C",
+      "title": "Sum of Min Query",
+      "url": "https://atcoder.jp/contests/abc420/tasks/abc420_c"
+    },
+    {
+      "id": "abc420_d",
+      "label": "D",
+      "title": "Toggle Maze",
+      "url": "https://atcoder.jp/contests/abc420/tasks/abc420_d"
+    },
+    {
+      "id": "abc420_e",
+      "label": "E",
+      "title": "Reachability Query",
+      "url": "https://atcoder.jp/contests/abc420/tasks/abc420_e"
+    },
+    {
+      "id": "abc420_f",
+      "label": "F",
+      "title": "kirinuki",
+      "url": "https://atcoder.jp/contests/abc420/tasks/abc420_f"
+    },
+    {
+      "id": "abc420_g",
+      "label": "G",
+      "title": "sqrt(n²+n+X)",
+      "url": "https://atcoder.jp/contests/abc420/tasks/abc420_g"
+    }
+  ]
+}
