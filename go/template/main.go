@@ -14,7 +14,7 @@ func Solve(r *Reader, w *Writer) {
 }
 
 func main() {
-	r, w := NewReader(os.Stdin, MaxBufferSize), NewWriter(os.Stdout)
+	r, w := NewReader(os.Stdin, 1*1024*1024), NewWriter(os.Stdout)
 	defer w.Flush()
 	Solve(r, w)
 }
@@ -22,8 +22,6 @@ func main() {
 // ================================================================
 // IO
 // ================================================================
-
-const MaxBufferSize = 1 * 1024 * 1024
 
 type Reader struct{ sc *bufio.Scanner }
 
@@ -33,8 +31,9 @@ func NewReader(r io.Reader, size int) *Reader {
 	sc.Split(bufio.ScanWords)
 	return &Reader{sc}
 }
-func (r *Reader) String() string   { r.sc.Scan(); return r.sc.Text() }
-func (r *Reader) Int() int         { return Atoi(r.String()) }
+func (r *Reader) String() string { r.sc.Scan(); return r.sc.Text() }
+func (r *Reader) Bytes() []byte { r.sc.Scan(); return r.sc.Bytes() }
+func (r *Reader) Int() int      { return Atoi(r.String()) }
 func (r *Reader) Float64() float64 { return Atof(r.String()) }
 
 type Writer struct{ bf *bufio.Writer }
@@ -201,13 +200,23 @@ func Any[T any](s []T, f func(T) bool) bool {
 	return false
 }
 
-// SliceLowerBound は a[i] >= x となる最初の i を返す、そのような i が存在しない場合は n を返す
-func SliceLowerBound[T Ordered](s []T, x T) int {
+// Count は a の要素で f を満たすものの数を返す
+func Count[T any](a []T, f func(T) bool) (count int) {
+	for _, v := range a {
+		if f(v) {
+			count++
+		}
+	}
+	return
+}
+
+// LowerBound は a[i] >= x となる最初の i を返す、そのような i が存在しない場合は n を返す
+func LowerBound[T Ordered](s []T, x T) int {
 	return BinarySearch(0, len(s), func(i int) bool { return s[i] >= x })
 }
 
-// SliceUpperBound は a[i] > x となる最初の i を返す、そのような i が存在しない場合は n を返す
-func SliceUpperBound[T Ordered](s []T, x T) int {
+// UpperBound は a[i] > x となる最初の i を返す、そのような i が存在しない場合は n を返す
+func UpperBound[T Ordered](s []T, x T) int {
 	return BinarySearch(0, len(s), func(i int) bool { return s[i] > x })
 }
 
