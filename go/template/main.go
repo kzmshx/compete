@@ -20,31 +20,6 @@ func main() {
 }
 
 // ================================================================
-// IO
-// ================================================================
-
-type Reader struct{ sc *bufio.Scanner }
-
-func NewReader(r io.Reader, size int) *Reader {
-	sc := bufio.NewScanner(r)
-	sc.Buffer(make([]byte, size), size)
-	sc.Split(bufio.ScanWords)
-	return &Reader{sc}
-}
-func (r *Reader) String() string { r.sc.Scan(); return r.sc.Text() }
-func (r *Reader) Bytes() []byte { r.sc.Scan(); return r.sc.Bytes() }
-func (r *Reader) Int() int      { return Atoi(r.String()) }
-func (r *Reader) Float64() float64 { return Atof(r.String()) }
-
-type Writer struct{ bf *bufio.Writer }
-
-func NewWriter(w io.Writer) *Writer              { return &Writer{bufio.NewWriter(w)} }
-func (w *Writer) Print(a ...any)                 { fmt.Fprint(w.bf, a...) }
-func (w *Writer) Printf(format string, a ...any) { fmt.Fprintf(w.bf, format, a...) }
-func (w *Writer) Println(a ...any)               { fmt.Fprintln(w.bf, a...) }
-func (w *Writer) Flush()                         { w.bf.Flush() }
-
-// ================================================================
 // Constraints
 // ================================================================
 
@@ -70,6 +45,40 @@ func Bin[T Integer](n T) string    { return strconv.FormatInt(int64(n), 2) }
 func Oct[T Integer](n T) string    { return strconv.FormatInt(int64(n), 8) }
 func Hex[T Integer](n T) string    { return strconv.FormatInt(int64(n), 16) }
 func ParseInt(s string, b int) int { return int(Unwrap(strconv.ParseInt(s, b, 64))) }
+
+// ================================================================
+// IO
+// ================================================================
+
+type Reader struct{ sc *bufio.Scanner }
+
+func NewReader(r io.Reader, size int) *Reader {
+	sc := bufio.NewScanner(r)
+	sc.Buffer(make([]byte, size), size)
+	sc.Split(bufio.ScanWords)
+	return &Reader{sc}
+}
+func (r *Reader) Bytes() []byte { r.sc.Scan(); return r.sc.Bytes() }
+func (r *Reader) Int() int      { return Atoi(r.String()) }
+func (r *Reader) Ints(n int) []int {
+	return MakeSlice(n, func(i int) int { return r.Int() })
+}
+func (r *Reader) String() string { r.sc.Scan(); return r.sc.Text() }
+func (r *Reader) Strings(n int) []string {
+	return MakeSlice(n, func(i int) string { return r.String() })
+}
+func (r *Reader) Float64() float64 { return Atof(r.String()) }
+func (r *Reader) Float64s(n int) []float64 {
+	return MakeSlice(n, func(i int) float64 { return r.Float64() })
+}
+
+type Writer struct{ bf *bufio.Writer }
+
+func NewWriter(w io.Writer) *Writer              { return &Writer{bufio.NewWriter(w)} }
+func (w *Writer) Print(a ...any)                 { fmt.Fprint(w.bf, a...) }
+func (w *Writer) Printf(format string, a ...any) { fmt.Fprintf(w.bf, format, a...) }
+func (w *Writer) Println(a ...any)               { fmt.Fprintln(w.bf, a...) }
+func (w *Writer) Flush()                         { w.bf.Flush() }
 
 // ================================================================
 // Math
