@@ -2,7 +2,7 @@
 | key  | value                                             |
 | ---- | ------------------------------------------------- |
 | url  | https://atcoder.jp/contests/abc418/tasks/abc418_b |
-| tags | #Brute-Force                                      |
+| tags | #brute_force                                      |
 
 ## 考察
 

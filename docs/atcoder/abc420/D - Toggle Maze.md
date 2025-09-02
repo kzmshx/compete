@@ -2,7 +2,7 @@
 | key  | value                                             |
 | ---- | ------------------------------------------------- |
 | url  | https://atcoder.jp/contests/abc420/tasks/abc420_d |
-| tags | #BFS                                              |
+| tags | #bfs                                              |
 
 ## 考察
 

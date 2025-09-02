@@ -2,7 +2,7 @@
 | key  | value                                             |
 | :--- | :------------------------------------------------ |
 | URL  | https://atcoder.jp/contests/abc419/tasks/abc419_c |
-| Tags | #二分探索 #チェビシェフ距離 #座標範囲の交差 #LowerBound              |
+| Tags | #binary_search #チェビシェフ距離 #座標範囲の交差 #lower_bound              |
 
 ## 考察
 

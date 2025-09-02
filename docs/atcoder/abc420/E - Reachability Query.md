@@ -2,7 +2,7 @@
 | key  | value                                             |
 | ---- | ------------------------------------------------- |
 | url  | https://atcoder.jp/contests/abc420/tasks/abc420_e |
-| tags | #UnionFind #UnionFindExtension                    |
+| tags | #union_find #union_find_extension                    |
 
 ## 考察
 

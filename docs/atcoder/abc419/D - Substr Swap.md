@@ -2,7 +2,7 @@
 | key  | value                                             |
 | ---- | ------------------------------------------------- |
 | url  | https://atcoder.jp/contests/abc419/tasks/abc419_d |
-| tags | #差分配列 #ビット演算                                      |
+| tags | #diff_array #bit                                      |
 
 ## 考察
 

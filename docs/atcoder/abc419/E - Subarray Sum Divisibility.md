@@ -2,7 +2,7 @@
 | key  | value                                             |
 | ---- | ------------------------------------------------- |
 | url  | https://atcoder.jp/contests/abc419/tasks/abc419_e |
-| tags | #動的計画法 #剰余                                        |
+| tags | #dp #mod                                        |
 
 ## 考察
 

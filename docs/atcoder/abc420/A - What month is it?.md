@@ -2,7 +2,7 @@
 | key  | value                                             |
 | ---- | ------------------------------------------------- |
 | url  | https://atcoder.jp/contests/abc420/tasks/abc420_a |
-| tags | #剰余                                               |
+| tags | #mod                                               |
 
 ## 考察
 
