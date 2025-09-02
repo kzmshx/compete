@@ -78,7 +78,14 @@ func NewWriter(w io.Writer) *Writer              { return &Writer{bufio.NewWrite
 func (w *Writer) Print(a ...any)                 { fmt.Fprint(w.bf, a...) }
 func (w *Writer) Printf(format string, a ...any) { fmt.Fprintf(w.bf, format, a...) }
 func (w *Writer) Println(a ...any)               { fmt.Fprintln(w.bf, a...) }
-func (w *Writer) Flush()                         { w.bf.Flush() }
+func (w *Writer) PrintYes(a bool) {
+	if a {
+		w.Println("Yes")
+	} else {
+		w.Println("No")
+	}
+}
+func (w *Writer) Flush() { w.bf.Flush() }
 
 // ================================================================
 // Math
