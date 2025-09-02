@@ -53,7 +53,12 @@
       "id": "abc420_e",
       "label": "E",
       "title": "Reachability Query",
-      "url": "https://atcoder.jp/contests/abc420/tasks/abc420_e"
+      "url": "https://atcoder.jp/contests/abc420/tasks/abc420_e",
+      "directory": {
+        "path": "e",
+        "testdir": "tests",
+        "submit": "main.go"
+      }
     },
     {
       "id": "abc420_f",
