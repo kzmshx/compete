@@ -341,27 +341,27 @@ func (z ModInt[T]) Equals(x ModInt[T]) bool {
 }
 
 // ================================================================
-// Union-Find
+// Union Find Tree
 // ================================================================
 
-// UnionFind is a disjoint-set data structure.
-type UnionFind struct {
+// UnionFindTree is a disjoint-set data structure.
+type UnionFindTree struct {
 	parent []int // parent[i] = parent of i
 	size   []int // size[i] = number of elements in subtree rooted at i
 }
 
-// NewUnionFind creates a new union-find data structure with n elements.
-func NewUnionFind(n int) *UnionFind {
-	u := &UnionFind{parent: make([]int, n), size: make([]int, n)}
+// NewUnionFindTree creates a new union-find data structure with n elements.
+func NewUnionFindTree(n int) *UnionFindTree {
+	u := &UnionFindTree{parent: make([]int, n), size: make([]int, n)}
 	for i := 0; i < n; i++ {
 		u.parent[i], u.size[i] = -1, 1
 	}
 	return u
 }
 
-// Union merges the components that elements x and y belong to.
-func (u *UnionFind) Union(x, y int) bool {
-	xRoot, yRoot := u.Find(x), u.Find(y)
+// Unite merges the components that elements x and y belong to.
+func (u *UnionFindTree) Unite(x, y int) bool {
+	xRoot, yRoot := u.Root(x), u.Root(y)
 	if xRoot == yRoot {
 		return false
 	}
@@ -375,22 +375,26 @@ func (u *UnionFind) Union(x, y int) bool {
 	return true
 }
 
-// Find returns the root of the component that element x belongs to.
-func (u *UnionFind) Find(x int) int {
+// Root returns the root of the component that element x belongs to.
+func (u *UnionFindTree) Root(x int) int {
 	// x is the root of the tree
 	if u.parent[x] == -1 {
 		return x
 	}
 	// Use path compression heuristic.
-	u.parent[x] = u.Find(u.parent[x])
+	u.parent[x] = u.Root(u.parent[x])
 	return u.parent[x]
 }
 
-// IsSame returns true if elements x and y belong to the same component.
-func (u *UnionFind) IsSame(x, y int) bool { return u.Find(x) == u.Find(y) }
+// Same returns true if elements x and y belong to the same component.
+func (u *UnionFindTree) Same(x, y int) bool {
+	return u.Root(x) == u.Root(y)
+}
 
 // Size returns the size of the component that element x belongs to.
-func (u *UnionFind) Size(x int) int { return u.size[u.Find(x)] }
+func (u *UnionFindTree) Size(x int) int {
+	return u.size[u.Root(x)]
+}
 
 // ================================================================
 // Priority Queue
