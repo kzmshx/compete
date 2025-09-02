@@ -34,6 +34,12 @@ type Ord interface{ Int | Float | ~string }
 // Conversion
 // ================================================================
 
+func Unwrap[T any](value T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return value
+}
 func Atoi(s string) int            { return Unwrap(strconv.Atoi(s)) }
 func Atof(s string) float64        { return Unwrap(strconv.ParseFloat(s, 64)) }
 func Itoa(i int) string            { return strconv.Itoa(i) }
@@ -164,23 +170,6 @@ func LCM(a, b int) int {
 }
 
 // ================================================================
-// Binary Search
-// ================================================================
-
-// BinarySearch は [l, r) の範囲で f が真となる最小の T を返す、f が真となる要素が存在しない場合は r を返す
-func BinarySearch[T Int](l, r T, f func(T) bool) T {
-	for l < r {
-		m := T(uint(l+r) >> 1)
-		if f(m) {
-			r = m
-		} else {
-			l = m + 1
-		}
-	}
-	return l
-}
-
-// ================================================================
 // Slices
 // ================================================================
 
@@ -221,6 +210,23 @@ func Count[T any](a []T, f func(T) bool) (count int) {
 		}
 	}
 	return
+}
+
+// ================================================================
+// Binary Search
+// ================================================================
+
+// BinarySearch は [l, r) の範囲で f が真となる最小の T を返す、f が真となる要素が存在しない場合は r を返す
+func BinarySearch[T Int](l, r T, f func(T) bool) T {
+	for l < r {
+		m := T(uint(l+r) >> 1)
+		if f(m) {
+			r = m
+		} else {
+			l = m + 1
+		}
+	}
+	return l
 }
 
 // LowerBound は a[i] >= x となる最初の i を返す、そのような i が存在しない場合は n を返す
@@ -427,9 +433,11 @@ func NewPriorityQueue[T any, P Ord](heuristic func(lhs, rhs P) bool) *PriorityQu
 	items[0] = nil
 	return &PriorityQueue[T, P]{items: items, itemCount: 0, comparator: heuristic}
 }
+
 func NewMaxPriorityQueue[T any, P Ord]() *PriorityQueue[T, P] {
 	return NewPriorityQueue[T](Maximum[P])
 }
+
 func NewMinPriorityQueue[T any, P Ord]() *PriorityQueue[T, P] {
 	return NewPriorityQueue[T](Minimum[P])
 }
@@ -531,13 +539,6 @@ func (d *Diff[T]) Build() []T {
 // ================================================================
 // Utilities
 // ================================================================
-
-func Unwrap[T any](value T, err error) T {
-	if err != nil {
-		panic(err)
-	}
-	return value
-}
 
 // RandomString generates a random string of length n.
 func RandomString(length int) string {
