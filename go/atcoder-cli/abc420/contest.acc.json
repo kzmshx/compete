@@ -42,7 +42,12 @@
       "id": "abc420_d",
       "label": "D",
       "title": "Toggle Maze",
-      "url": "https://atcoder.jp/contests/abc420/tasks/abc420_d"
+      "url": "https://atcoder.jp/contests/abc420/tasks/abc420_d",
+      "directory": {
+        "path": "d",
+        "testdir": "tests",
+        "submit": "main.go"
+      }
     },
     {
       "id": "abc420_e",
