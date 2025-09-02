@@ -2,7 +2,7 @@
 | key  | value                                             |
 | ---- | ------------------------------------------------- |
 | url  | https://atcoder.jp/contests/abc418/tasks/abc418_c |
-| tags | #binary_search                                             |
+| tags | #binary_search #cumulative_sum                    |
 
 ## 考察
 
@@ -16,18 +16,20 @@
 
 ## 実装
 
+### 1. 累積和と二分探索
+
 ```go
 func Solve(r *Reader, w *Writer) {
-	n, q := r.Int(), r.Int()
-	a := r.Ints(n)
-	sort.Ints(a)
-
+	n, q := r.Int(), r.Int() // O(1)
+	a := r.Ints(n)           // O(N)
+	sort.Ints(a)             // O(N.log(N))
+	// O(N)
 	asum := make([]int, n+1)
 	asum[0] = 0
 	for i, v := range a {
 		asum[i+1] = asum[i] + v
 	}
-
+	// O(Q.log(N))
 	for i := 0; i < q; i++ {
 		b := r.Int()
 		if j := BinarySearch(0, len(a), func(i int) bool { return a[i] >= b }); j < len(a) {
