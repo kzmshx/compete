@@ -23,16 +23,12 @@ func main() {
 // Constraints
 // ================================================================
 
-type Signed interface{ ~int | ~int32 | ~int64 }
-type Unsigned interface{ ~uint | ~uint32 | ~uint64 }
-type Integer interface{ Signed | Unsigned }
+type Sgn interface{ ~int | ~int32 | ~int64 }
+type Uns interface{ ~uint | ~uint32 | ~uint64 }
+type Int interface{ Sgn | Uns }
 type Float interface{ ~float32 | ~float64 }
-type Actual interface{ Integer | Float }
-type Imaginary interface{ ~complex64 | ~complex128 }
-type Ordered interface{ Integer | Float | ~string }
-type Addable interface {
-	Integer | Float | Imaginary | ~string
-}
+type Num interface{ Int | Float }
+type Ord interface{ Int | Float | ~string }
 
 // ================================================================
 // Conversion
@@ -41,9 +37,9 @@ type Addable interface {
 func Atoi(s string) int            { return Unwrap(strconv.Atoi(s)) }
 func Atof(s string) float64        { return Unwrap(strconv.ParseFloat(s, 64)) }
 func Itoa(i int) string            { return strconv.Itoa(i) }
-func Bin[T Integer](n T) string    { return strconv.FormatInt(int64(n), 2) }
-func Oct[T Integer](n T) string    { return strconv.FormatInt(int64(n), 8) }
-func Hex[T Integer](n T) string    { return strconv.FormatInt(int64(n), 16) }
+func Bin[T Int](n T) string        { return strconv.FormatInt(int64(n), 2) }
+func Oct[T Int](n T) string        { return strconv.FormatInt(int64(n), 8) }
+func Hex[T Int](n T) string        { return strconv.FormatInt(int64(n), 16) }
 func ParseInt(s string, b int) int { return int(Unwrap(strconv.ParseInt(s, b, 64))) }
 
 // ================================================================
@@ -74,11 +70,12 @@ func (r *Reader) Float64s(n int) []float64 {
 
 type Writer struct{ bf *bufio.Writer }
 
-func NewWriter(w io.Writer) *Writer              { return &Writer{bufio.NewWriter(w)} }
-func (w *Writer) Print(a ...any)                 { fmt.Fprint(w.bf, a...) }
-func (w *Writer) Printf(format string, a ...any) { fmt.Fprintf(w.bf, format, a...) }
-func (w *Writer) Println(a ...any)               { fmt.Fprintln(w.bf, a...) }
-func (w *Writer) PrintYes(a bool) {
+func NewWriter(w io.Writer) *Writer                  { return &Writer{bufio.NewWriter(w)} }
+func (w *Writer) Print(a ...any)                     { fmt.Fprint(w.bf, a...) }
+func (w *Writer) Printf(format string, a ...any)     { fmt.Fprintf(w.bf, format, a...) }
+func (w *Writer) Println(a ...any)                   { fmt.Fprintln(w.bf, a...) }
+func (w *Writer) PrintlnFloat64(a float64, prec int) { w.Printf("%.*f", prec, a) }
+func (w *Writer) PrintlnYes(a bool) {
 	if a {
 		w.Println("Yes")
 	} else {
@@ -92,7 +89,7 @@ func (w *Writer) Flush() { w.bf.Flush() }
 // ================================================================
 
 // Digits は base 進数で n を表す数字の配列を返す
-func Digits[T Integer](n T, base T) (r []T) {
+func Digits[T Int](n T, base T) (r []T) {
 	for n > 0 {
 		r = append(r, n%base)
 		n /= base
@@ -101,7 +98,7 @@ func Digits[T Integer](n T, base T) (r []T) {
 }
 
 // Max は a と b の最大値を返す
-func Max[T Ordered](a, b T) T {
+func Max[T Ord](a, b T) T {
 	if a > b {
 		return a
 	}
@@ -109,7 +106,7 @@ func Max[T Ordered](a, b T) T {
 }
 
 // Min は a と b の最小値を返す
-func Min[T Ordered](a, b T) T {
+func Min[T Ord](a, b T) T {
 	if a < b {
 		return a
 	}
@@ -117,7 +114,7 @@ func Min[T Ordered](a, b T) T {
 }
 
 // ChooseMax は a と b の最大値を a に設定して返す
-func ChooseMax[T Ordered](a *T, b T) T {
+func ChooseMax[T Ord](a *T, b T) T {
 	if *a < b {
 		*a = b
 	}
@@ -125,7 +122,7 @@ func ChooseMax[T Ordered](a *T, b T) T {
 }
 
 // ChooseMin は a と b の最小値を a に設定して返す
-func ChooseMin[T Ordered](a *T, b T) T {
+func ChooseMin[T Ord](a *T, b T) T {
 	if *a > b {
 		*a = b
 	}
@@ -133,7 +130,7 @@ func ChooseMin[T Ordered](a *T, b T) T {
 }
 
 // Abs は x の絶対値を返す
-func Abs[T Actual](x T) T {
+func Abs[T Num](x T) T {
 	if x < T(0) {
 		return -x
 	}
@@ -141,7 +138,7 @@ func Abs[T Actual](x T) T {
 }
 
 // Pow は x の n 乗を返す
-func Pow[T Actual](x T, n int) T {
+func Pow[T Num](x T, n int) T {
 	y := T(1)
 	for n > 0 {
 		if n&1 == 1 {
@@ -171,7 +168,7 @@ func LCM(a, b int) int {
 // ================================================================
 
 // BinarySearch は [l, r) の範囲で f が真となる最小の T を返す、f が真となる要素が存在しない場合は r を返す
-func BinarySearch[T Integer](l, r T, f func(T) bool) T {
+func BinarySearch[T Int](l, r T, f func(T) bool) T {
 	for l < r {
 		m := T(uint(l+r) >> 1)
 		if f(m) {
@@ -227,12 +224,12 @@ func Count[T any](a []T, f func(T) bool) (count int) {
 }
 
 // LowerBound は a[i] >= x となる最初の i を返す、そのような i が存在しない場合は n を返す
-func LowerBound[T Ordered](s []T, x T) int {
+func LowerBound[T Ord](s []T, x T) int {
 	return BinarySearch(0, len(s), func(i int) bool { return s[i] >= x })
 }
 
 // UpperBound は a[i] > x となる最初の i を返す、そのような i が存在しない場合は n を返す
-func UpperBound[T Ordered](s []T, x T) int {
+func UpperBound[T Ord](s []T, x T) int {
 	return BinarySearch(0, len(s), func(i int) bool { return s[i] > x })
 }
 
@@ -240,12 +237,12 @@ func UpperBound[T Ordered](s []T, x T) int {
 // CyclicInt 循環整数
 // ================================================================
 
-type CyclicInt[T Signed] struct {
+type CyclicInt[T Sgn] struct {
 	v T
 	c T
 }
 
-func NewCyclicInt[T Signed](v, c T) CyclicInt[T] {
+func NewCyclicInt[T Sgn](v, c T) CyclicInt[T] {
 	v = ((v-1)%c+c)%c + 1
 	return CyclicInt[T]{v: v, c: c}
 }
@@ -271,12 +268,12 @@ func (z CyclicInt[T]) Decrement() CyclicInt[T] {
 // ModInt モジュラー整数
 // ================================================================
 
-type ModInt[T Integer] struct {
+type ModInt[T Int] struct {
 	v T
 	m T
 }
 
-func NewModInt[T Integer](v, m T) ModInt[T] {
+func NewModInt[T Int](v, m T) ModInt[T] {
 	v %= m
 	if v < 0 {
 		v += m
@@ -407,33 +404,33 @@ func (u *UnionFindTree) Size(x int) int {
 // Priority Queue
 // ================================================================
 
-func Maximum[T Ordered](lhs, rhs T) bool { return lhs < rhs }
-func Minimum[T Ordered](lhs, rhs T) bool { return lhs > rhs }
+func Maximum[T Ord](lhs, rhs T) bool { return lhs < rhs }
+func Minimum[T Ord](lhs, rhs T) bool { return lhs > rhs }
 
-type priorityQueueItem[T any, P Ordered] struct {
+type priorityQueueItem[T any, P Ord] struct {
 	value    T
 	priority P
 }
 
-func newPriorityQueueItem[T any, P Ordered](value T, priority P) *priorityQueueItem[T, P] {
+func newPriorityQueueItem[T any, P Ord](value T, priority P) *priorityQueueItem[T, P] {
 	return &priorityQueueItem[T, P]{value: value, priority: priority}
 }
 
-type PriorityQueue[T any, P Ordered] struct {
+type PriorityQueue[T any, P Ord] struct {
 	items      []*priorityQueueItem[T, P]
 	itemCount  uint
 	comparator func(lhs, rhs P) bool
 }
 
-func NewPriorityQueue[T any, P Ordered](heuristic func(lhs, rhs P) bool) *PriorityQueue[T, P] {
+func NewPriorityQueue[T any, P Ord](heuristic func(lhs, rhs P) bool) *PriorityQueue[T, P] {
 	items := make([]*priorityQueueItem[T, P], 1)
 	items[0] = nil
 	return &PriorityQueue[T, P]{items: items, itemCount: 0, comparator: heuristic}
 }
-func NewMaxPriorityQueue[T any, P Ordered]() *PriorityQueue[T, P] {
+func NewMaxPriorityQueue[T any, P Ord]() *PriorityQueue[T, P] {
 	return NewPriorityQueue[T](Maximum[P])
 }
-func NewMinPriorityQueue[T any, P Ordered]() *PriorityQueue[T, P] {
+func NewMinPriorityQueue[T any, P Ord]() *PriorityQueue[T, P] {
 	return NewPriorityQueue[T](Minimum[P])
 }
 
@@ -505,9 +502,9 @@ func (pq *PriorityQueue[T, P]) Peek() (value T, priority P, ok bool) {
 // Difference Array
 // ================================================================
 
-type Diff[T Actual] struct{ delta []T }
+type Diff[T Num] struct{ delta []T }
 
-func NewDiff[T Actual](size int) *Diff[T] {
+func NewDiff[T Num](size int) *Diff[T] {
 	return &Diff[T]{delta: make([]T, size+1)}
 }
 
@@ -589,12 +586,12 @@ func RenderGraph(graph [][]int, root int) {
 	w.Println("```")
 }
 
-func Intersect1D[T Ordered](a, b [2]T) ([2]T, bool) {
+func Intersect1D[T Ord](a, b [2]T) ([2]T, bool) {
 	min, max := Max(a[0], b[0]), Min(a[1], b[1])
 	return [2]T{min, max}, min <= max
 }
 
-func Intersect2D[T Ordered](a, b [2][2]T) ([2][2]T, bool) {
+func Intersect2D[T Ord](a, b [2][2]T) ([2][2]T, bool) {
 	rowRange, okRowRange := Intersect1D(a[0], b[0])
 	colRange, okColRange := Intersect1D(a[1], b[1])
 	return [2][2]T{rowRange, colRange}, okRowRange && okColRange
