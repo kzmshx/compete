@@ -20,7 +20,12 @@
       "id": "abc418_b",
       "label": "B",
       "title": "You're a teapot",
-      "url": "https://atcoder.jp/contests/abc418/tasks/abc418_b"
+      "url": "https://atcoder.jp/contests/abc418/tasks/abc418_b",
+      "directory": {
+        "path": "b",
+        "testdir": "tests",
+        "submit": "main.go"
+      }
     },
     {
       "id": "abc418_c",
