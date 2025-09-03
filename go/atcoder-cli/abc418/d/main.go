@@ -9,18 +9,17 @@ import (
 )
 
 func Solve(r *Reader, w *Writer) {
-	n, t := r.Int(), r.String()
-	e, o := 0, 0
-	c := 0
-	for r := 1; r <= n; r++ {
-		if t[r-1] == '0' {
+	_, t := r.Int(), r.String()
+	e, o, a := 0, 0, 0
+	for _, c := range t {
+		if c == '0' {
 			e, o = o, e+1
 		} else {
 			e++
 		}
-		c += e
+		a += e
 	}
-	w.Println(c)
+	w.Println(a)
 }
 
 func main() {
