@@ -76,24 +76,6 @@ func Abs[T Actual](x T) T {
 	return x
 }
 
-type UnionFind struct {
-	parent []int
-	size   []int
-}
-
-type priorityQueueItem[T any, P Ordered] struct {
-	value    T
-	priority P
-}
-
-type PriorityQueue[T any, P Ordered] struct {
-	items      []*priorityQueueItem[T, P]
-	itemCount  uint
-	comparator func(lhs, rhs P) bool
-}
-
-type Diff[T Actual] struct{ delta []T }
-
 func Unwrap[T any](value T, err error) T {
 	if err != nil {
 		panic(err)
