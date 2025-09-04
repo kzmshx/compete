@@ -537,6 +537,38 @@ func (d *Diff[T]) Build() []T {
 }
 
 // ================================================================
+// Vec 2次元ベクトル
+// ================================================================
+
+type Vec[T Sgn] struct{ X, Y T }
+
+func NewVec[T Sgn](x, y T) Vec[T] { return Vec[T]{X: x, Y: y} }
+
+func DirectionMap[K comparable, T Sgn](u, d, l, r K) map[K]Vec[T] {
+	return map[K]Vec[T]{
+		u: NewVec(T(0), T(-1)),
+		d: NewVec(T(0), T(1)),
+		l: NewVec(T(-1), T(0)),
+		r: NewVec(T(1), T(0)),
+	}
+}
+
+// Basic operations
+func (v Vec[T]) Add(u Vec[T]) Vec[T]  { return NewVec(v.X+u.X, v.Y+u.Y) }
+func (v Vec[T]) Sub(u Vec[T]) Vec[T]  { return NewVec(v.X-u.X, v.Y-u.Y) }
+func (v Vec[T]) Scale(k T) Vec[T]     { return NewVec(v.X*k, v.Y*k) }
+func (v Vec[T]) Equals(u Vec[T]) bool { return v.X == u.X && v.Y == u.Y }
+func (v Vec[T]) InBounds(min, max Vec[T]) bool {
+	return min.X <= v.X && v.X <= max.X && min.Y <= v.Y && v.Y <= max.Y
+}
+func (v Vec[T]) InGrid(h, w T) bool { return v.InBounds(NewVec(T(0), T(0)), NewVec(T(h), T(w))) }
+
+// Distance
+func (v Vec[T]) Chebyshev(u Vec[T]) T        { return Max(Abs(v.X-u.X), Abs(v.Y-u.Y)) }
+func (v Vec[T]) EuclideanSquared(u Vec[T]) T { return Pow(v.X-u.X, 2) + Pow(v.Y-u.Y, 2) }
+func (v Vec[T]) Manhattan(u Vec[T]) T        { return Abs(v.X-u.X) + Abs(v.Y-u.Y) }
+
+// ================================================================
 // Utilities
 // ================================================================
 
