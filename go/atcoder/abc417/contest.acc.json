@@ -31,7 +31,12 @@
       "id": "abc417_c",
       "label": "C",
       "title": "Distance Indicators",
-      "url": "https://atcoder.jp/contests/abc417/tasks/abc417_c"
+      "url": "https://atcoder.jp/contests/abc417/tasks/abc417_c",
+      "directory": {
+        "path": "c",
+        "testdir": "tests",
+        "submit": "main.go"
+      }
     },
     {
       "id": "abc417_d",
