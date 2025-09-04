@@ -76,10 +76,19 @@ func (r *Reader) Float64s(n int) []float64 {
 
 type Writer struct{ bf *bufio.Writer }
 
-func NewWriter(w io.Writer) *Writer                  { return &Writer{bufio.NewWriter(w)} }
-func (w *Writer) Print(a ...any)                     { fmt.Fprint(w.bf, a...) }
-func (w *Writer) Printf(format string, a ...any)     { fmt.Fprintf(w.bf, format, a...) }
-func (w *Writer) Println(a ...any)                   { fmt.Fprintln(w.bf, a...) }
+func NewWriter(w io.Writer) *Writer              { return &Writer{bufio.NewWriter(w)} }
+func (w *Writer) Print(a ...any)                 { fmt.Fprint(w.bf, a...) }
+func (w *Writer) Printf(format string, a ...any) { fmt.Fprintf(w.bf, format, a...) }
+func (w *Writer) Println(a ...any)               { fmt.Fprintln(w.bf, a...) }
+func (w *Writer) PrintlnInts(a []int) {
+	for i, v := range a {
+		w.Print(v)
+		if i < len(a)-1 {
+			w.Print(" ")
+		}
+	}
+	w.Println()
+}
 func (w *Writer) PrintlnFloat64(a float64, prec int) { w.Printf("%.*f", prec, a) }
 func (w *Writer) PrintlnYes(a bool) {
 	if a {
@@ -216,27 +225,66 @@ func Count[T any](a []T, f func(T) bool) (count int) {
 // Binary Search
 // ================================================================
 
-// BinarySearch は [l, r) の範囲で f が真となる最小の T を返す、f が真となる要素が存在しない場合は r を返す
-func BinarySearch[T Int](l, r T, f func(T) bool) T {
+// BinarySearch は3-way比較関数を使った汎用二分探索
+// f(m) == 0: ターゲット発見
+// f(m) < 0: ターゲットは右側にある
+// f(m) > 0: ターゲットは左側にある
+func BinarySearch(l, r int, f func(int) int) (int, bool) {
 	for l < r {
-		m := T(uint(l+r) >> 1)
-		if f(m) {
-			r = m
-		} else {
+		m := l + (r-l)/2
+		switch cmp := f(m); {
+		case cmp == 0:
+			return m, true
+		case cmp < 0:
 			l = m + 1
+		case cmp > 0:
+			r = m
 		}
 	}
-	return l
+	return l, false
 }
 
-// LowerBound は a[i] >= x となる最初の i を返す、そのような i が存在しない場合は n を返す
+type Cmp[T Ord] func(s []T, x T) func(int) int
+
+func Cmp3Way[T Ord](s []T, x T) func(int) int {
+	return func(i int) int {
+		if s[i] == x {
+			return 0
+		}
+		if s[i] < x {
+			return -1
+		}
+		return 1
+	}
+}
+
+func CmpGT[T Ord](s []T, x T) func(int) int {
+	return func(i int) int {
+		if s[i] <= x {
+			return -1
+		}
+		return 1
+	}
+}
+
+// BinarySearchExact は x と完全一致する最初の i を返す、見つからない場合は -1
+func BinarySearchExact[T Ord](s []T, x T) int {
+	if i, ok := BinarySearch(0, len(s), Cmp3Way(s, x)); ok {
+		return i
+	}
+	return -1
+}
+
+// LowerBound は a[i] >= x となる最初の i を返す
 func LowerBound[T Ord](s []T, x T) int {
-	return BinarySearch(0, len(s), func(i int) bool { return s[i] >= x })
+	i, _ := BinarySearch(0, len(s), Cmp3Way(s, x))
+	return i
 }
 
-// UpperBound は a[i] > x となる最初の i を返す、そのような i が存在しない場合は n を返す
+// UpperBound は a[i] > x となる最初の i を返す
 func UpperBound[T Ord](s []T, x T) int {
-	return BinarySearch(0, len(s), func(i int) bool { return s[i] > x })
+	i, _ := BinarySearch(0, len(s), CmpGT(s, x))
+	return i
 }
 
 // ================================================================
