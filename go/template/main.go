@@ -80,7 +80,14 @@ func NewWriter(w io.Writer) *Writer              { return &Writer{bufio.NewWrite
 func (w *Writer) Print(a ...any)                 { fmt.Fprint(w.bf, a...) }
 func (w *Writer) Printf(format string, a ...any) { fmt.Fprintf(w.bf, format, a...) }
 func (w *Writer) Println(a ...any)               { fmt.Fprintln(w.bf, a...) }
-func (w *Writer) PrintlnInts(a []int) {
+func (w *Writer) Bool(a bool) {
+	if a {
+		w.Println("Yes")
+	} else {
+		w.Println("No")
+	}
+}
+func (w *Writer) Ints(a []int) {
 	for i, v := range a {
 		w.Print(v)
 		if i < len(a)-1 {
@@ -89,15 +96,8 @@ func (w *Writer) PrintlnInts(a []int) {
 	}
 	w.Println()
 }
-func (w *Writer) PrintlnFloat64(a float64, prec int) { w.Printf("%.*f", prec, a) }
-func (w *Writer) PrintlnYes(a bool) {
-	if a {
-		w.Println("Yes")
-	} else {
-		w.Println("No")
-	}
-}
-func (w *Writer) Flush() { w.bf.Flush() }
+func (w *Writer) Float64(a float64, prec int) { w.Printf("%.*f", prec, a) }
+func (w *Writer) Flush()                      { w.bf.Flush() }
 
 // ================================================================
 // Math
