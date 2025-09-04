@@ -20,7 +20,12 @@
       "id": "abc417_b",
       "label": "B",
       "title": "Search and Delete",
-      "url": "https://atcoder.jp/contests/abc417/tasks/abc417_b"
+      "url": "https://atcoder.jp/contests/abc417/tasks/abc417_b",
+      "directory": {
+        "path": "b",
+        "testdir": "tests",
+        "submit": "main.go"
+      }
     },
     {
       "id": "abc417_c",
