@@ -2,7 +2,8 @@
 | key  | value                                             |
 | ---- | ------------------------------------------------- |
 | url  | https://atcoder.jp/contests/abc419/tasks/abc419_e |
-| tags | #dp #mod                                        |
+| tags | #dp #mod                                          |
+| lose | #lose/2025/08/29                                  |
 
 ## 考察
 

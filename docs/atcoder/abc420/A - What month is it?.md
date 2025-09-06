@@ -2,7 +2,8 @@
 | key  | value                                             |
 | ---- | ------------------------------------------------- |
 | url  | https://atcoder.jp/contests/abc420/tasks/abc420_a |
-| tags | #mod                                               |
+| tags | #mod                                              |
+| lose |                                                   |
 
 ## 考察
 

@@ -2,7 +2,8 @@
 | key  | value                                             |
 | ---- | ------------------------------------------------- |
 | url  | https://atcoder.jp/contests/abc416/tasks/abc416_c |
-| tags |                                                   |
+| tags | #brute_force                                      |
+| lose |                                                   |
 
 ## 考察
 
@@ -41,13 +42,4 @@ func Solve(r *Reader, w *Writer) {
 	sort.Strings(strs)
 	w.Println(strs[x-1])
 }
-```
-
-### K 進数: $O(KL))$
-
-- 辞書順 $X$ 番目の文字列を直接構築する
-- 処理中の各位置で何番目の文字列を選ぶべきかを計算する
-- 
-
-```go
 ```

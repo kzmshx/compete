@@ -3,6 +3,8 @@
 | ---- | ------------------------------------------------- |
 | url  | https://atcoder.jp/contests/abc416/tasks/abc416_d |
 | tags | #greedy #two_pointer                              |
+| lose | #lose/2025/09/06                                  |
+
 
 ## 考察
 

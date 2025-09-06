@@ -3,6 +3,7 @@
 | ---- | ------------------------------------------------- |
 | url  | https://atcoder.jp/contests/abc420/tasks/abc420_d |
 | tags | #bfs                                              |
+| lose | #lose/2025/09/02                                  |
 
 ## 考察
 

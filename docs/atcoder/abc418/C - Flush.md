@@ -3,6 +3,7 @@
 | ---- | ------------------------------------------------- |
 | url  | https://atcoder.jp/contests/abc418/tasks/abc418_c |
 | tags | #binary_search #cumulative_sum                    |
+| lose |                                                   |
 
 ## 考察
 

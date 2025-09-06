@@ -3,6 +3,7 @@
 | ---- | ------------------------------------------------- |
 | url  | https://atcoder.jp/contests/abc418/tasks/abc418_b |
 | tags | #brute_force                                      |
+| lose |                                                   |
 
 ## 考察
 

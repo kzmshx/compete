@@ -3,6 +3,7 @@
 | ---- | ------------------------------------------------- |
 | url  | https://atcoder.jp/contests/abc418/tasks/abc418_d |
 | tags | #dp #bit                                          |
+| lose | #lose/2025/09/03                                  |
 
 ## 考察
 

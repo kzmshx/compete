@@ -3,6 +3,7 @@
 | ---- | ------------------------------------------------- |
 | url  | https://atcoder.jp/contests/abc421/tasks/abc421_d |
 | tags |                                                   |
+| lose | #lose/2025/08/30                                  |
 
 ## 考察
 

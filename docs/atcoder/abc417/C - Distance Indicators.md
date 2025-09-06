@@ -3,6 +3,7 @@
 | ---- | ------------------------------------------------- |
 | url  | https://atcoder.jp/contests/abc417/tasks/abc417_c |
 | tags | #combination                                      |
+| lose | #lose/2025/09/05                                  |
 
 ## 考察
 
