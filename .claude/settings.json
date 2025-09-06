@@ -7,9 +7,7 @@
       "Bash(git fetch:*)",
       "Bash(git pull:*)",
       "Bash(git push:*)",
-      "Bash(git status:*)",
-      "WebFetch(domain:atcoder.jp)",
-      "WebFetch(domain:*.atcoder.jp)"
+      "Bash(git status:*)"
     ],
     "deny": [
       "Edit(*.cpp)",
@@ -18,5 +16,9 @@
       "Edit(*.py)",
       "Edit(*.rs)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "mcp-fetch-server"
+  ],
+  "enableAllProjectMcpServers": true
 }
