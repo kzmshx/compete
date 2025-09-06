@@ -42,7 +42,12 @@
       "id": "abc416_d",
       "label": "D",
       "title": "Match, Mod, Minimize 2",
-      "url": "https://atcoder.jp/contests/abc416/tasks/abc416_d"
+      "url": "https://atcoder.jp/contests/abc416/tasks/abc416_d",
+      "directory": {
+        "path": "d",
+        "testdir": "tests",
+        "submit": "main.go"
+      }
     },
     {
       "id": "abc416_e",
