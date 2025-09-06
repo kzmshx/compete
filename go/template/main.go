@@ -319,60 +319,61 @@ func (z CyclicInt[T]) Decrement() CyclicInt[T] {
 }
 
 // ================================================================
-// ModInt モジュラー整数
+// Mint モジュラー整数
 // ================================================================
 
-type ModInt[T Int] struct {
-	v T
-	m T
+type MintFac[T Int] struct{ m T }
+
+func NewMintFac[T Int](m T) MintFac[T] { return MintFac[T]{m: m} }
+func (f MintFac[T]) New(v T) mint[T]   { return newMint(v, f.m) }
+
+type mint[T Int] struct {
+	Val T
+	m   T
 }
 
-func NewModInt[T Int](v, m T) ModInt[T] {
+func newMint[T Int](v, m T) mint[T] {
 	v %= m
 	if v < 0 {
 		v += m
 	}
-	return ModInt[T]{v: v, m: m}
+	return mint[T]{Val: v, m: m}
 }
 
-func (z ModInt[T]) assertModulus(x ModInt[T], op string) {
+func (z mint[T]) assertModulus(x mint[T], op string) {
 	if z.m != x.m {
 		panic(fmt.Sprintf("ModInt: "+op+": modulus mismatch %v != %v", z.m, x.m))
 	}
 }
 
-func (z ModInt[T]) Value() T {
-	return z.v
-}
-
-func (z ModInt[T]) Add(x ModInt[T]) ModInt[T] {
+func (z mint[T]) Add(x mint[T]) mint[T] {
 	z.assertModulus(x, "Add")
-	res := z.v + x.v
+	res := z.Val + x.Val
 	if res >= z.m {
 		res -= z.m
 	}
-	return ModInt[T]{v: res, m: z.m}
+	return mint[T]{Val: res, m: z.m}
 }
 
-func (z ModInt[T]) Sub(x ModInt[T]) ModInt[T] {
+func (z mint[T]) Sub(x mint[T]) mint[T] {
 	z.assertModulus(x, "Sub")
-	res := z.v - x.v
+	res := z.Val - x.Val
 	if res < 0 {
 		res += z.m
 	}
-	return ModInt[T]{v: res, m: z.m}
+	return mint[T]{Val: res, m: z.m}
 }
 
-func (z ModInt[T]) Mul(x ModInt[T]) ModInt[T] {
+func (z mint[T]) Mul(x mint[T]) mint[T] {
 	z.assertModulus(x, "Mul")
-	return ModInt[T]{v: (z.v * x.v) % z.m, m: z.m}
+	return mint[T]{Val: (z.Val * x.Val) % z.m, m: z.m}
 }
 
-func (z ModInt[T]) Pow(n T) ModInt[T] {
+func (z mint[T]) Pow(n T) mint[T] {
 	if n < 0 {
 		return z.Inv().Pow(-n)
 	}
-	ret := NewModInt(1, z.m)
+	ret := newMint(1, z.m)
 	base := z
 	for n > 0 {
 		if n&1 == 1 {
@@ -384,18 +385,18 @@ func (z ModInt[T]) Pow(n T) ModInt[T] {
 	return ret
 }
 
-func (z ModInt[T]) Inv() ModInt[T] {
+func (z mint[T]) Inv() mint[T] {
 	z.assertModulus(z, "Inv")
 	return z.Pow(z.m - 2)
 }
 
-func (z ModInt[T]) Div(x ModInt[T]) ModInt[T] {
+func (z mint[T]) Div(x mint[T]) mint[T] {
 	z.assertModulus(x, "Div")
 	return z.Mul(x.Inv())
 }
 
-func (z ModInt[T]) Equals(x ModInt[T]) bool {
-	return z.v == x.v && z.m == x.m
+func (z mint[T]) Equals(x mint[T]) bool {
+	return z.Val == x.Val && z.m == x.m
 }
 
 // ================================================================
