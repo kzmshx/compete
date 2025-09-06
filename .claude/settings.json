@@ -8,14 +8,14 @@
       "Bash(git pull:*)",
       "Bash(git push:*)",
       "Bash(git status:*)",
-      "WebFetch(domain:atcoder.jp)",
+      "WebFetch(domain:atcoder.jp)"
     ],
     "deny": [
       "Edit(*.cpp)",
       "Edit(*.go)",
       "Edit(*.hs)",
       "Edit(*.py)",
-      "Edit(*.rs)",
+      "Edit(*.rs)"
     ]
   }
 }
