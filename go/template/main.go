@@ -60,19 +60,13 @@ func NewReader(r io.Reader, size int) *Reader {
 	sc.Split(bufio.ScanWords)
 	return &Reader{sc}
 }
-func (r *Reader) Bytes() []byte { r.sc.Scan(); return r.sc.Bytes() }
-func (r *Reader) Int() int      { return Atoi(r.String()) }
-func (r *Reader) Ints(n int) []int {
-	return MakeSlice(n, func(i int) int { return r.Int() })
-}
-func (r *Reader) String() string { r.sc.Scan(); return r.sc.Text() }
-func (r *Reader) Strings(n int) []string {
-	return MakeSlice(n, func(i int) string { return r.String() })
-}
-func (r *Reader) Float64() float64 { return Atof(r.String()) }
-func (r *Reader) Float64s(n int) []float64 {
-	return MakeSlice(n, func(i int) float64 { return r.Float64() })
-}
+func (r *Reader) Bytes() []byte        { r.sc.Scan(); return r.sc.Bytes() }
+func (r *Reader) Int() int             { return Atoi(r.Str()) }
+func (r *Reader) Ints(n int) []int     { return SliceFn(n, func(i int) int { return r.Int() }) }
+func (r *Reader) Str() string          { r.sc.Scan(); return r.sc.Text() }
+func (r *Reader) Strs(n int) []string  { return SliceFn(n, func(i int) string { return r.Str() }) }
+func (r *Reader) F64() float64         { return Atof(r.Str()) }
+func (r *Reader) F64s(n int) []float64 { return SliceFn(n, func(i int) float64 { return r.F64() }) }
 
 type Writer struct{ bf *bufio.Writer }
 
@@ -182,8 +176,8 @@ func LCM(a, b int) int {
 // Slices
 // ================================================================
 
-// MakeSlice は長さ n のスライスを作成し、各要素を f で初期化して返す
-func MakeSlice[T any](n int, f func(i int) T) []T {
+// SliceFn は長さ n のスライスを作成し、各要素を f で初期化して返す
+func SliceFn[T any](n int, f func(i int) T) []T {
 	a := make([]T, n)
 	for i := range a {
 		a[i] = f(i)
