@@ -1,9 +1,9 @@
 
-| key  | value                                             |
-| :--- | :------------------------------------------------ |
-| url  | https://atcoder.jp/contests/abc419/tasks/abc419_c |
-| tags | #binary_search #チェビシェフ距離 #座標範囲の交差 #lower_bound    |
-| lose |                                                   |
+| key  | value                                                    |
+| :--- | :------------------------------------------------------- |
+| url  | https://atcoder.jp/contests/abc419/tasks/abc419_c        |
+| tags | #binary_search #chebyshev_distance #座標範囲の交差 #lower_bound |
+| lose |                                                          |
 
 ## 考察
 
