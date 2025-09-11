@@ -31,7 +31,12 @@
       "id": "abc414_c",
       "label": "C",
       "title": "Palindromic in Both Bases",
-      "url": "https://atcoder.jp/contests/abc414/tasks/abc414_c"
+      "url": "https://atcoder.jp/contests/abc414/tasks/abc414_c",
+      "directory": {
+        "path": "c",
+        "testdir": "tests",
+        "submit": "main.go"
+      }
     },
     {
       "id": "abc414_d",
